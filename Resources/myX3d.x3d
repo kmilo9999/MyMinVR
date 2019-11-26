@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding ="UTF-8"?>
+
+<X3D profile="Immersive" version="3.0">
+  <head>
+    <meta name="filename" content="C:/Users/cdiaz8/Documents/Visual Studio 2013/Projects/MyMinVR/MyMinVR/myX3d.x3d"/>
+    <meta name="generator" content="Visualization ToolKit X3D exporter v0.9.1"/>
+    <meta name="numberofelements" content="10"/>
+  </head>
+  <Scene>
+    <Background skyColor="0.32 0.34 0.43"/>
+    <Viewpoint fieldOfView="0.523599" position="0.635943 -0.164511 3.22128" description="Default View" orientation="0.107983 -0.0785234 0.991047 -1.50123" centerOfRotation="0.0659856 -0.277632 0.0708041"/>
+    <NavigationInfo type='"EXAMINE" "FLY" "ANY"' speed="4" headlight="true"/>
+    <DirectionalLight ambientIntensity="1" intensity="0" color="1 1 1"/>
+    <Transform DEF="ROOT" translation="0 0 0">
+      <DirectionalLight direction="-0.111619 -0.766044 -0.633022" color="1 0.97232 0.90222" intensity="0.75" on="true"/>
+      <DirectionalLight direction="0.0449435 0.965926 -0.254887" color="0.90824 0.93314 1" intensity="0.25" on="true"/>
+      <DirectionalLight direction="-0.939693 0 0.34202" color="0.9998 0.9998 0.9998" intensity="0.214286" on="true"/>
+      <DirectionalLight direction="0.939693 0 0.34202" color="0.9998 0.9998 0.9998" intensity="0.214286" on="true"/>
+      <Transform translation="0 0 0" rotation="0 0 1 -0" scale="1 1 1">
+        <Group>
+          <Shape>
+            <Appearance>
+              <Material ambientIntensity="0" emissiveColor="0 0 0" diffuseColor="1 1 1" specularColor="0 0 0" shininess="0.78125" transparency="0"/>
+            </Appearance>
+            <IndexedFaceSet solid="false" colorPerVertex="false" normalPerVertex="false" coordIndex="
+              6 5 4 3 2 1 -1 
+              0 1 2 -1 
+              0 2 3 -1 
+              0 3 4 -1 
+              0 4 5 -1 
+              0 5 6 -1 
+              0 6 1 -1 
+              ">
+              <Coordinate DEF="VTKcoordinates0000" point="
+                0.5 0 0,
+                -0.5 0.5 0,
+                -0.5 0.25 0.433013,
+                -0.5 -0.25 0.433013,
+                -0.5 -0.5 6.12323e-017,
+                -0.5 -0.25 -0.433013,
+                -0.5 0.25 -0.433013,
+                "/>
+            </IndexedFaceSet>
+          </Shape>
+        </Group>
+      </Transform>
+      <Transform translation="0 0 0" rotation="0 0 1 -0" scale="1 1 1">
+        <Group/>
+      </Transform>
+    </Transform>
+  </Scene>
+</X3D>

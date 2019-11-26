@@ -1,0 +1,8 @@
+.vs/
+x64/
+*.sln
+*.suo
+*.db
+*.vcxproj
+*.filters
+*.user

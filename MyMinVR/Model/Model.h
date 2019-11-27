@@ -22,13 +22,13 @@ public:
 
 
 	glm::vec3& position();
-	void setPosition(glm::vec3& val);
+	void setPosition(glm::vec3 val);
 
 	glm::quat& orientation(); 
-	void setOrientation(glm::quat& val); 
+	void setOrientation(glm::quat val); 
 
 	glm::vec3& scale(); 
-	void setScale(glm::vec3& val); 
+	void setScale(glm::vec3 val); 
 
 
 	float boundingVolumenRadius() const; 

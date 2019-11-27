@@ -69,7 +69,7 @@ glm::vec3& Model::position()
 	return myPosition;
 }
 
-void Model::setPosition(glm::vec3& val)
+void Model::setPosition(glm::vec3 val)
 {
 	myPosition = val;
 }
@@ -79,7 +79,7 @@ glm::quat& Model::orientation()
 	return myOrientation;
 }
 
-void Model::setOrientation(glm::quat& val)
+void Model::setOrientation(glm::quat val)
 {
 	myOrientation = val;
 }
@@ -89,7 +89,7 @@ glm::vec3& Model::scale()
 	return myScale;
 }
 
-void Model::setScale(glm::vec3& val)
+void Model::setScale(glm::vec3 val)
 {
 	myScale = val;
 }

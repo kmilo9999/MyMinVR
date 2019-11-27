@@ -208,13 +208,16 @@ void MyVRApp::initModel()
 	skyDomeModel = GLMLoader::loadModel(skyDomeFileName);
 	Texture* skyTexture = new Texture(GL_TEXTURE_2D, "../Resources/SkyDome.png");
 	skyDomeModel->addTexture(skyTexture);
-	skyDomeModel->setPosition(glm::vec3(0.0f, -10.0f, -5.0f));
-	skyDomeModel->setScale(glm::vec3(70.0f, 70.0f, 70.0f));
+        glm::vec3 skyInitPos = glm::vec3(0.0f, -10.0f, -5.0f);
+        glm::vec3 skyInitScale = glm::vec3(70.0f, 70.0f, 70.0f);
+	skyDomeModel->setPosition(skyInitPos);
+	skyDomeModel->setScale(skyInitScale);
 
 
 	terrain = new Terrain(80, 80,"../Resources/mceclip6.png");
 	
-	terrain->model().setPosition(glm::vec3(-2.0f, -2.0f, -2.0f));
+        glm::vec3 tererainInitPos = glm::vec3(-2.0f, -2.0f, -2.0f);
+	terrain->model().setPosition(tererainInitPos);
     
 	
 

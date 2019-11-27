@@ -67,13 +67,13 @@ void Camera::Stop(MovingFlag direction)
 	inputFlag &= !direction;
 }
 
-glm::mat4& Camera::GetView()
+glm::mat4 Camera::GetView()
 {
 	// Camera matrix
 	return glm::lookAt(myPosition, myPosition + myFront, myUp);
 }
 
-glm::mat4& Camera::GetView(const float* vm)
+glm::mat4 Camera::GetView(const float* vm)
 {
 	glm::mat4 viewMatrix = glm::mat4(vm[0], vm[1], vm[2], vm[3],
 		vm[4], vm[5], vm[6], vm[7],

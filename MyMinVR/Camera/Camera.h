@@ -41,9 +41,9 @@ public:
 	glm::vec3 myUp;
 	glm::vec3 myRightv;
 
-	glm::mat4& GetView();
+	glm::mat4 GetView();
 	
-	glm::mat4& GetView(const float* vm);
+	glm::mat4 GetView(const float* vm);
 
 	glm::vec3 GetFront();
 

@@ -37,6 +37,7 @@ set(LIBRARIES
   ${GLEW_LIBRARY}
   ${GLM_LIBRARIES}
 
+  STB_IMAGE
   AssimpLoader
   Camera
   GLMLoader
@@ -45,8 +46,11 @@ set(LIBRARIES
   Terrain
   Texture
 )
-  
+
 message( STATUS "message to display" ${LIBRARIES})  
+
+# STB_IMAGE
+add_library(STB_IMAGE "stb_image/stb_image.cpp")
 
 add_subdirectory(AssimpLoader)
 add_subdirectory(Camera)
@@ -55,6 +59,7 @@ add_subdirectory(GLMLoader)
 add_subdirectory(Model)
 add_subdirectory(ShaderProgram)
 add_subdirectory(Terrain)
+#add_subdirectory(stb_image)
 add_subdirectory(Texture)
 
 

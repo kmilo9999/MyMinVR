@@ -1,7 +1,6 @@
 #include "Texture.h"
 //#include <FreeImage\FreeImage.h>
-#define STB_IMAGE_IMPLEMENTATION
-#include "..\stb_image\stb_image.h"
+#include <stb_image.h>
 
 
 Texture::Texture(GLenum TextureTarget, const std::string& filename) : myTextureTarget(TextureTarget)

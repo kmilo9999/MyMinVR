@@ -6,3 +6,4 @@ x64/
 *.vcxproj
 *.filters
 *.user
+build/

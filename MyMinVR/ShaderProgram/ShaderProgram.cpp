@@ -29,7 +29,7 @@ void ShaderProgram::LoadShaders(const char * vertex_filenname, const char * frag
 	glLinkProgram(progarmId);
 
 	glGetProgramiv(progarmId, GL_LINK_STATUS, (int *)&IsLinked);
-	if (IsLinked == FALSE)
+	if (IsLinked == false)
 	{
 		int maxLength;
 		glGetProgramiv(progarmId, GL_INFO_LOG_LENGTH, &maxLength);
@@ -136,7 +136,7 @@ void ShaderProgram::VerifiProgram(GLuint programId)
 	// Check Vertex Shader
 	glGetShaderiv(programId, GL_COMPILE_STATUS, &Result);
 
-	if (Result == FALSE) {
+	if (Result == false) {
 		glGetShaderiv(programId, GL_INFO_LOG_LENGTH, &InfoLogLength);
 		std::vector<char> VertexShaderErrorMessage(InfoLogLength + 1);
 		glGetShaderInfoLog(programId, InfoLogLength, NULL, &VertexShaderErrorMessage[0]);

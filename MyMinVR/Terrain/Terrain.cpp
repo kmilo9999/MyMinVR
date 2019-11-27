@@ -1,7 +1,7 @@
 #include "../Terrain/Terrain.h"
 #include "../common/common.h"
 
-#include "../stb_image/stb_image.h"
+#include <stb_image.h>
 
 #include <assert.h>
 #define MAX_HEIGHT 10

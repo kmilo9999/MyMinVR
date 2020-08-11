@@ -8,12 +8,23 @@ find_package(glm REQUIRED)
 
 find_package(ASSIMP REQUIRED)
 if(ASSIMP_FOUND)
-    message(STATUS "Found ASSIMP in ${ASSIMP_INCLUDE_DIR}")
+    message(STATUS "Found ASSIMP in ${ASSIMP_INCLUDE_DIRS}")
     include_directories(${ASSIMP_INCLUDE_DIR})
 else()
     message(STATUS "ASSIMP NOT Found ")
 endif() 
 
+find_package(ImguiVR REQUIRED)
+
+if(ImguiVR_FOUND)
+    message(STATUS "Found ImguiVR in ${IMGUIVR_INCLUDE_DIRS}")
+	message(STATUS "Found ImguiVR in ${IMGUIVR_INCLUDE_DIR}")
+	message(STATUS "Found ImguiVR in ${ImguiVR_INCLUDE_DIR}")
+	message(STATUS "Found ImguiVR in ${ImguiVR_INCLUDE_DIRS}")
+    include_directories(${IMGUIVR_INCLUDE_DIRS})
+else()
+    message(STATUS "ImguiVR NOT Found ")
+endif() 
 
 set(MINVR_PATH "${MINVR_INCLUDE_DIR}/MinVR-2.0/")
 
@@ -25,7 +36,10 @@ include_directories(
   ${GLEW_INCLUDE_DIRS}
   ${GLM_INCLUDE_DIRS}
   ${ASSIMP_INCLUDE_DIRS}
-  
+  ${IMGUIVR_INCLUDE_DIRS} 
+  ${IMGUIVR_INCLUDE_DIR} 
+  ${ImguiVR_INCLUDE_DIR}  
+  ${ImguiVR_INCLUDE_DIRS}
 )
 
 
@@ -36,6 +50,7 @@ set(LIBRARIES
   ${OPENGL_LIBRARY}
   ${GLEW_LIBRARY}
   ${GLM_LIBRARIES}
+  ${IMGUIVR_LIBRARIES}
 
   stb_image
   AssimpLoader

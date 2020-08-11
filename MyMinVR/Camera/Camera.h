@@ -19,7 +19,7 @@ public:
 		Down
 	};
 
-	Camera(glm::vec3 Position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 front = glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3 Up = glm::vec3(0.0, 1.0, 0.0));
+	Camera(int width, int height,glm::vec3 Position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 front = glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3 Up = glm::vec3(0.0, 1.0, 0.0));
 	~Camera();
 
 	
@@ -53,7 +53,7 @@ public:
 	float myVerticalAngle;
 	float myFoV;
 
-	int myHWindowWidth;
+	int myWindowWidth;
 	int myWindowHeight;
 
 private:

@@ -6,6 +6,8 @@
 #include <api/MinVR.h>
 #include "ShaderProgram/ShaderProgram.h"
 
+#include <VRMenuHandler.h>
+#include <imgui/imfilebrowser.h>
 
 // forward declaration
 class Texture;
@@ -58,7 +60,7 @@ protected:
 
 	void renderScene(const MinVR::VRGraphicsState &renderState);
 
-	void initCamera();
+	void initCamera(int width, int height);
 
 	void rotateOnYaxis(Model& object, float direction);
 
@@ -72,13 +74,22 @@ protected:
 
 	void onTrackerMove(const MinVR::VRTrackerEvent &event);
 
-private:
+protected:
 
+  
 	void renderRay(glm::vec3 from);
 	void rayInterection(const MinVR::VRGraphicsState &renderState);
 
 	void renderSphere(const MinVR::VRGraphicsState &renderState);
 	void renderListOfMeshes(const MinVR::VRGraphicsState &renderState);
+
+  void menu_callback();
+  void menu_callback2();
+
+  void loadFileModel(std::string& fileName);
+  Model* TestRayEntityIntersection(vec3 ray);
+
+  glm::vec3 RayCast(float mouse_x, float mouse_y);
 
 	glm::mat4 m_terrain;
 
@@ -116,6 +127,10 @@ private:
 	float fOuterRadius = 60.25f;
 
 	Camera* camera;
+  glm::vec2 cursorCurrentPos;
+  glm::vec2 lastMousePosition;
+
+  Model* mouseSelectedEntity;
 
 	GLuint bVao;
 	GLuint bVbo;
@@ -125,9 +140,13 @@ private:
 	bool rotateObject;
 	bool translateObject;
 
+  VRMenuHandler *menus;
+  ImGui::FileBrowser fileDialog;
+
 	glm::vec3 carpetPosition, carpetUp, carpetScale;
 	float carpetDirection; // (expressed in radians)
 	glm::quat carpetQuatDirection;
+  bool m_is2d;
 };
 
 #endif

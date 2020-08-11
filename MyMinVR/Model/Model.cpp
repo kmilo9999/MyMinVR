@@ -103,3 +103,39 @@ void Model::setBoundingVolumenRadius(float val)
 {
 	myBoundingVolumenRadius = val;
 }
+
+bool Model::RayInstersection(vec3 start, vec3 rayDirection)
+{
+  
+  glm::vec3 Position = myPosition;
+
+  float b = 2 * (rayDirection.x * (start.x - Position.x) +
+    rayDirection.y * (start.y - Position.y) + rayDirection.z * (start.z - Position.z));
+  float c = start.x * start.x - 2 * start.x * Position.x + Position.x * Position.x
+    + start.y * start.y - 2 * start.y * Position.y + Position.y * Position.y
+    + start.z * start.z - 2 * start.z * Position.z + Position.z * Position.z - myBoundingVolumenRadius * myBoundingVolumenRadius;
+
+  float discr = (b * b - 4 * c);
+  if (discr < 0)
+  {
+    mySelected = false;
+    
+  }
+  else
+  {
+    mySelected = true;
+    
+  }
+
+  return mySelected;
+}
+
+bool Model::isSelected()
+{
+  return mySelected;
+}
+
+void Model::seleted(bool selected)
+{
+  mySelected = selected;
+}

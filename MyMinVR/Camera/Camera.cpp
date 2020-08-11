@@ -2,10 +2,13 @@
 
 
 
-Camera::Camera(glm::vec3 Postion /*= glm::vec3(0.0f, 0.0f, 0.0f)*/, glm::vec3 front /*= glm::vec3(0.0f, 0.0f, -1.0f)*/, glm::vec3 Up /*= glm::vec3(0.0, 1.0, 0.0)*/)
+Camera::Camera(int width, int height, glm::vec3 Postion /*= glm::vec3(0.0f, 0.0f, 0.0f)*/, glm::vec3 front /*= glm::vec3(0.0f, 0.0f, -1.0f)*/, glm::vec3 Up /*= glm::vec3(0.0, 1.0, 0.0)*/)
 :myPosition(Postion),
-mySpeed(0.1f), myMouseSpeed(0.1f), myFoV(45.0f), inputFlag(MovingFlag::stop), lastMousePosition(0.0f, 0.0f),
-myCanRotate(false), myFront(normalize(front)), myUp(glm::normalize(Up))
+mySpeed(0.1f), myMouseSpeed(0.1f), myFoV(45.0f), inputFlag(MovingFlag::stop), 
+lastMousePosition(0.0f, 0.0f),
+myCanRotate(false), myFront(normalize(front)), myUp(glm::normalize(Up)),
+myWindowWidth(width),
+myWindowHeight(height)
 {
 
 }

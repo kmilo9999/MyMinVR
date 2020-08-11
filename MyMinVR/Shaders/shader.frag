@@ -17,5 +17,5 @@ void main() {
     fragColor = (ambient + diffuse) * color;
 	//fragColor = color;
 
-	//fragColor = vec4(texture( myTextureSampler, TexCoord ).rgb,1);
+	fragColor = vec4(texture( myTextureSampler, TexCoord ).rgb,1);
 }

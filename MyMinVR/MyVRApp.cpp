@@ -30,6 +30,7 @@
 #include "Camera/Camera.h"
 #include "Model/Model.h"
 #include <math.h>
+#include <string>
 # define M_PI           3.14159265358979323846  /* pi */
 
 #include "AssimpLoader/AssimpLoader.h"
@@ -43,8 +44,14 @@ m_shader(0),
 showRayByRotation(false),
 showRayByTranslation(false),
 rotateObject(false), translateObject(false),
+camera(0),
+menus(0),
+objModel(0),
+m_is2d(true),
+mouseSelectedEntity(0),
 VRApp(argc, argv)
 { 
+  
 	//MinVR::VRMain::registerEventHandler(this);
 	{
 		for (int index = 1; index < argc; ++index)
@@ -53,11 +60,15 @@ VRApp(argc, argv)
 			if (strcmp(argv[index], "-c") == 0)
 			{
 				std::string fileConf = argv[index + 1];
-				if (fileConf.find("HTC_Vive.minvr") != string::npos)
+				if (fileConf.find("HTC_Vive.minvr") != std::string::npos)
 				{
 					myMode = vr;
 				}
-				else if (fileConf.find("yurt.minvr") != string::npos)
+        else if (fileConf.find("RemoteDisplay.minvr") != std::string::npos)
+        {
+          myMode = vr;
+        }
+				else if (fileConf.find("yurt.minvr") != std::string::npos)
 				{
 					myMode = cave;
 				}
@@ -75,7 +86,11 @@ VRApp(argc, argv)
 				}
 				break;
 			}
-
+      
+      menus = new VRMenuHandler(m_is2d);
+      menus->addNewMenu(std::bind(&MyVRApp::menu_callback, this), 1024, 1024, 1, 1);
+      VRMenu* menu = menus->addNewMenu(std::bind(&MyVRApp::menu_callback2, this), 1024, 1024, 1, 1);
+      menu->setMenuPose(glm::mat4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 2, 2, 0, 1));
 		}
 
 
@@ -177,14 +192,14 @@ void MyVRApp::initModel()
 	glGenVertexArrays(1, &bVao);
 	glGenBuffers(1, &bVbo);
 
-	//std::string objFileName = "translatedYunnyWall6.obj";
-	//objModel = GLMLoader::loadModel(objFileName);
+	std::string objFileName = "../Resources/cube.obj";
+	objModel = GLMLoader::loadModel(objFileName);
 
 	//// Initialize texture
-	//Texture* m_texture = new Texture(GL_TEXTURE_2D, "../Resources/Himalayas_DEM_Cube.jpg");
-	//objModel->addTexture(m_texture);
-	//objModel->setPosition(glm::vec3(0, 0, -5.0f));
-	//objModel->setScale(glm::vec3(0.25f, 0.25f, 0.25f));
+	Texture* m_texture = new Texture(GL_TEXTURE_2D, "../Resources/Himalayas_DEM_Cube.jpg");
+	objModel->addTexture(m_texture);
+	objModel->setPosition(glm::vec3(0, 0, -5.0f));
+	objModel->setScale(glm::vec3(0.25f, 0.25f, 0.25f));
 
 
 	glm::vec3 rotAxis(0, 0, 1);
@@ -309,12 +324,12 @@ void MyVRApp::renderScene(const MinVR::VRGraphicsState &renderState)
 		simpleColorShader.stop();
 	}
 
-	//renderListOfMeshes(renderState);
+	renderListOfMeshes(renderState);
 
 	//renderSphere(renderState);
 
-	//if (objModel)
-	if (false)
+	if (objModel)
+	//if (false)
 	{
 		simpleTextureShader.start();
 		simpleTextureShader.setUniformMatrix4fv("p", renderState.getProjectionMatrix());
@@ -386,9 +401,10 @@ void MyVRApp::renderScene(const MinVR::VRGraphicsState &renderState)
 	}
 }
 
-void MyVRApp::initCamera()
+void MyVRApp::initCamera(int width, int height)
 {
-	camera = new Camera(glm::vec3(0, 1, 8), glm::vec3(0,0,-1));
+	camera = new Camera(width, height, glm::vec3(0, 1, 8), glm::vec3(0,0,-1));
+  
 }
 
 void MyVRApp::rotateOnYaxis(Model& object, float direction)
@@ -443,6 +459,13 @@ void MyVRApp::onAnalogChange(const MinVR::VRAnalogEvent &event)
 
 				}*/
 			}
+
+      if (menus != NULL && menus->windowIsActive() 
+        && event.getName() == "HTC_Controller_Right_TrackPad0_Y" 
+        || event.getName() == "HTC_Controller_1_TrackPad0_Y")
+      {
+        menus->setAnalogValue(event.getValue());
+      }
 
 			if (event.getName().find("HTC_Controller_1_Trigger1") != -1
 				|| event.getName().find("HTC_Controller_Right_Trigger1") != -1)
@@ -513,6 +536,37 @@ void MyVRApp::onAnalogChange(const MinVR::VRAnalogEvent &event)
 
 void MyVRApp::onButtonDown(const MinVR::VRButtonEvent &event)
 {
+  if (menus != NULL && menus->windowIsActive()) {
+    if (event.getName() == "HTC_Controller_Right_Axis1Button_Down" 
+      || event.getName() == "HTC_Controller_1_Axis1Button_Down")
+    {
+      //left click
+      menus->setButtonClick(0, 1);
+    }
+    else if (event.getName() == "HTC_Controller_Right_GripButton_Down" 
+      || event.getName() == "HTC_Controller_1_GripButton_Down")
+    {
+      //middle click
+      menus->setButtonClick(2, 1);
+    }
+    //else if (event.getName() == "HTC_Controller_Right_AButton_Down" || event.getName() == "HTC_Controller_1_AButton_Down")
+    else if (event.getName() == "HTC_Controller_Right_Axis0Button_Down" 
+      || event.getName() == "HTC_Controller_1_Axis0Button_Down")
+    {
+      //right click
+      menus->setButtonClick(1, 1);
+    }
+    else if (event.getName() == "MouseBtnLeft_Down")
+    {
+      menus->setButtonClick(0, 1);
+    }
+    else if (event.getName() == "MouseBtnRight_Down")
+    {
+      menus->setButtonClick(1, 1);
+    }
+  }
+
+
 	if (event.getName() == "MouseBtnRight_Down")
 	{
 		if (camera)
@@ -520,6 +574,24 @@ void MyVRApp::onButtonDown(const MinVR::VRButtonEvent &event)
 			camera->SetCaRotate(true);
 		}
 	}
+  
+  if (event.getName() == "MouseBtnLeft_Down")
+  {
+    
+    glm::vec3 ray = RayCast(cursorCurrentPos.x, cursorCurrentPos.y);
+    std::cout << ray.x << "," << ray.y << "," << ray.z << std::endl;
+    mouseSelectedEntity = TestRayEntityIntersection(ray);
+    if (mouseSelectedEntity)
+    {
+      std::cout << "PICK SOMETHING" << std::endl;
+
+    }
+    else
+    {
+      std::cout << "NO PICK SOMETHING" << std::endl;
+    }
+  }
+
 
 
 	if (event.getName() == "KbdW_Down")
@@ -579,8 +651,57 @@ void MyVRApp::onButtonDown(const MinVR::VRButtonEvent &event)
 
 void MyVRApp::onButtonUp(const MinVR::VRButtonEvent &event)
 {
+
+  if (menus != NULL)
+  {
+    if (event.getName() == "HTC_Controller_Right_Axis1Button_Up" || event.getName() == "HTC_Controller_1_Axis1Button_Up")
+    {
+      //left click
+      menus->setButtonClick(0, 0);
+
+    }
+    else if (event.getName() == "HTC_Controller_Right_GripButton_Up" || event.getName() == "HTC_Controller_1_GripButton_Up")
+    {
+      //middle click
+      menus->setButtonClick(2, 0);
+    }
+    //else if (event.getName() == "HTC_Controller_Right_AButton_Down" || event.getName() == "HTC_Controller_1_AButton_Down")
+    else if (event.getName() == "HTC_Controller_Right_Axis0Button_Up" || event.getName() == "HTC_Controller_1_Axis0Button_Up")
+    {
+      //right click
+      menus->setButtonClick(1, 0);
+    }
+    if (event.getName() == "MouseBtnLeft_Up")
+    {
+      menus->setButtonClick(0, 0);
+    }
+    else if (event.getName() == "MouseBtnRight_Up")
+    {
+      menus->setButtonClick(1, 0);
+    }
+    else if (menus->windowIsActive() && event.getName() == "MouseBtnMiddle_ScrollUp")
+    {
+      menus->setAnalogValue(10);
+    }
+
+    if (menus->windowIsActive() && event.getName() == "MouseBtnMiddle_ScrollDown")
+    {
+      menus->setAnalogValue(-10);
+    }
+
+  }
+
 	if (myMode == desktop)
 	{
+    if (event.getName() == "MouseBtnLeft_Up")
+    {
+      if (mouseSelectedEntity)
+      {
+        mouseSelectedEntity = 0;
+      }
+      
+    }
+
 		if (event.getName() == "MouseBtnRight_Up")
 		{
 			if (camera)
@@ -652,15 +773,56 @@ void MyVRApp::onCursorMove(const MinVR::VRCursorEvent &event)
 {
 	if (myMode == desktop)
 	{
+    
 		if (event.getName() == "Mouse_Move")
 		{
+      menus->setCursorPos(event.getPos()[0], event.getPos()[1]);  
 			//std::cout << event.getName() << std::endl;
 			const float* pos = event.getPos();
 			glm::vec2 npos(pos[0], pos[1]);
+      cursorCurrentPos = npos;
+      //std::cout << "cursor pos" <<cursorCurrentPos.x << " " << cursorCurrentPos.y << std::endl;
 			if (camera)
 			{
 				camera->RotateView(npos);
 			}
+
+      if (!mouseSelectedEntity)
+      {
+        lastMousePosition.x = cursorCurrentPos.x;
+        lastMousePosition.y = cursorCurrentPos.y;
+        
+      }
+      else
+      {
+        vec3 rightVector = glm::normalize(glm::cross(camera->myFront, camera->myUp))*0.06f;
+        vec3 upvector = glm::normalize(camera->myUp)*0.06f;
+        float deltaX = (cursorCurrentPos.x - lastMousePosition.x);
+        float deltaY = (cursorCurrentPos.y - lastMousePosition.y);
+        float absolutX = abs(deltaX);
+        float absolutY = abs(deltaY);
+        vec3 newPosition = mouseSelectedEntity->position();
+        if (deltaX && deltaX < 0 && absolutX > 2.5)
+        {
+          newPosition -= rightVector;
+        }
+        else if (deltaX && deltaX > 0 && absolutX > 2.5)
+        {
+          newPosition += rightVector;
+        }
+
+        if (deltaY && deltaY < 0 && absolutY > 2.5)
+        {
+          newPosition += upvector;
+        }
+        else if (deltaY && deltaY > 0 && absolutY > 2.5)
+        {
+          newPosition -= upvector;
+        }
+        mouseSelectedEntity->setPosition(newPosition);
+        lastMousePosition.x = cursorCurrentPos.x;
+        lastMousePosition.y = cursorCurrentPos.y;
+      }
 
 		}
 	}
@@ -669,7 +831,13 @@ void MyVRApp::onCursorMove(const MinVR::VRCursorEvent &event)
 
 void MyVRApp::onTrackerMove(const MinVR::VRTrackerEvent &event)
 {
-	//std::cout << event.getName() << "\n";
+	
+  if (event.getName() == "HTC_Controller_Right_Move" 
+    || event.getName() == "HTC_Controller_1_Move") {
+    menus->setControllerPose(glm::make_mat4(event.getTransform()));
+  }
+  
+  //std::cout << event.getName() << "\n";
 	if (//event.getName() == "HTC_Controller_1_Move" ||
 		 event.getName() == "HTC_Controller_2_Move" ||
 		 //event.getName() == "HTC_Controller_Left_Move" ||
@@ -849,14 +1017,126 @@ void MyVRApp::renderListOfMeshes(const MinVR::VRGraphicsState & renderState)
 	}
 }
 
+void MyVRApp::menu_callback()
+{
+  // create a file browser instance
+  if (m_is2d) {
+    ImGui::SetNextWindowSize(ImVec2(300, 300), ImGuiCond_Once);
+    ImGui::SetNextWindowPos(ImVec2(40, 40), ImGuiCond_Once);
+  }
+
+  //...do other stuff like ImGui::NewFrame();
+
+  if (ImGui::Begin("dummy window"))
+  {
+    // open file dialog when user clicks this button
+    if (ImGui::Button("open file dialog")) {
+      // (optional) set browser properties
+      fileDialog.SetTitle("title");
+      fileDialog.SetTypeFilters({ ".obj" });
+
+      fileDialog.Open();
+    }
+    ImGui::End();
+
+
+    fileDialog.Display();
+
+    if (fileDialog.HasSelected())
+    {
+      std::string selectedFile = fileDialog.GetSelected().string();
+
+      std::cout << "Selected filename" << selectedFile << std::endl;
+      loadFileModel(selectedFile);
+
+      fileDialog.ClearSelected();
+    }
+
+    ////...do other stuff like ImGui::Render();
+  }
+}
+
+void MyVRApp::menu_callback2()
+{
+  if (m_is2d) {
+    ImGui::SetNextWindowSize(ImVec2(500, 300), ImGuiCond_Once);
+    ImGui::SetNextWindowPos(ImVec2(400, 40), ImGuiCond_Once);
+  }
+  ImGui::ShowDemoWindow();
+}
+
+void MyVRApp::loadFileModel(std::string& fileName)
+{
+  Model* newObjModel = GLMLoader::loadModel(fileName);
+  if (newObjModel)
+  {
+    newObjModel->setPosition(glm::vec3(0,0,0));
+    loadedModels.push_back(newObjModel);
+  }
+  else
+  {
+    std::cout << "Selected filename" << fileName << "did not load" <<std::endl;
+  }
+  
+  
+}
+
+Model* MyVRApp::TestRayEntityIntersection(vec3 ray)
+{
+ 
+  if (objModel)
+  {
+    if (objModel->RayInstersection(camera->myPosition, ray))
+    {
+      return objModel;
+    }
+  }
+
+  for (int i = 0; i < loadedModels.size(); ++i)
+  {
+    Model* model = loadedModels[i];
+
+    if (model->RayInstersection(camera->myPosition, ray))
+    {
+      return model;
+    }
+
+  }
+
+  return 0;
+}
+
+glm::vec3 MyVRApp::RayCast(float mouse_x, float mouse_y)
+{
+  vec4 rayClip((2.0f * mouse_x) / camera->myWindowWidth - 1.0f,
+    1.0f - (2.0f *  mouse_y) / camera->myWindowHeight, -1.0, 1.0);
+  mat4 projection = glm::perspective(
+    camera->myFoV,(float)camera->myWindowWidth / (float)camera->myWindowHeight, 0.1f, 1000.0f);
+  vec4 rayEye = inverse(projection) * rayClip;
+  rayEye.z = -1.0f;
+  rayEye.w = 0.0f;
+  mat4 view = camera->GetView();
+  mat4 invView = inverse(view);
+  vec4 temp = invView * rayEye;
+  vec3 rayWorld(temp.x, temp.y, temp.z);
+  rayWorld = normalize(rayWorld);
+  return rayWorld;
+}
+
 void MyVRApp::onRenderGraphicsContext(const MinVR::VRGraphicsState &renderState)
 {
 	// Run setup if this is the initial call.
 	if (renderState.isInitialRenderCall()) {
+    
+    //renderState.getValue("");
+    MinVR::VRDataIndex index = renderState.index();
+    int width = index.getValue("/WindowWidth");
+    int height = index.getValue("/WindowHeight");
+    
 
 		initGraphicsDrivers();
 
-		initCamera();
+		initCamera(width, height);
 
 		initModel();
 
@@ -865,7 +1145,11 @@ void MyVRApp::onRenderGraphicsContext(const MinVR::VRGraphicsState &renderState)
 		
 
 	}
-	
+  if (menus)
+  {
+    menus->renderToTexture();
+  }
+  
 }
 
 void MyVRApp::onRenderGraphicsScene(const MinVR::VRGraphicsState &renderState)
@@ -877,7 +1161,7 @@ void MyVRApp::onRenderGraphicsScene(const MinVR::VRGraphicsState &renderState)
 		renderScene(renderState);
 		camera->Update();
 	//}
-
+    menus->drawMenu();
 	/*if (viewer.valid())
 	{
 		viewer->frame();

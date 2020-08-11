@@ -34,6 +34,11 @@ public:
 	float boundingVolumenRadius() const; 
 	void setBoundingVolumenRadius(float val); 
 
+  bool RayInstersection(vec3 start, vec3 rayDirection);
+
+  bool isSelected();
+  void seleted(bool );
+
 private:
 
 	Model();
@@ -51,6 +56,7 @@ private:
 
 	float myBoundingVolumenRadius;
 
+  bool mySelected;
 };
 
 #endif

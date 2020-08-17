@@ -34,6 +34,7 @@
 # define M_PI           3.14159265358979323846  /* pi */
 
 #include "AssimpLoader/AssimpLoader.h"
+#include <glm/gtx/matrix_decompose.hpp>
 
 MyVRApp::MyVRApp(int argc, char *argv[])
 :m_vbo(0),
@@ -49,6 +50,7 @@ menus(0),
 objModel(0),
 m_is2d(true),
 mouseSelectedEntity(0),
+grab(false),
 VRApp(argc, argv)
 { 
   
@@ -63,6 +65,7 @@ VRApp(argc, argv)
 				if (fileConf.find("HTC_Vive.minvr") != std::string::npos)
 				{
 					myMode = vr;
+          m_is2d = false;
 				}
         else if (fileConf.find("RemoteDisplay.minvr") != std::string::npos)
         {
@@ -71,6 +74,7 @@ VRApp(argc, argv)
 				else if (fileConf.find("yurt.minvr") != std::string::npos)
 				{
 					myMode = cave;
+          m_is2d = false;
 				}
 				else
 				{
@@ -132,6 +136,7 @@ void MyVRApp::initShaders()
 	simpleTextureShader.addUniform("m");
 	simpleTextureShader.addUniform("v");
 	simpleTextureShader.addUniform("p");
+  simpleTextureShader.addUniform("intersected");
 
 	simpleColorShader.LoadShaders("Shaders/simpleColorShader.vert", "Shaders/simpleColorShader.frag");
 	simpleColorShader.addUniform("m");
@@ -193,13 +198,22 @@ void MyVRApp::initModel()
 	glGenBuffers(1, &bVbo);
 
 	std::string objFileName = "../Resources/cube.obj";
-	objModel = GLMLoader::loadModel(objFileName);
+  objModel = GLMLoader::loadModel(objFileName);
+
+  //std::string objFileName = "../Resources/cube.obj";
+  objModel2 = GLMLoader::loadModel(objFileName);
 
 	//// Initialize texture
 	Texture* m_texture = new Texture(GL_TEXTURE_2D, "../Resources/Himalayas_DEM_Cube.jpg");
 	objModel->addTexture(m_texture);
-	objModel->setPosition(glm::vec3(0, 0, -5.0f));
-	objModel->setScale(glm::vec3(0.25f, 0.25f, 0.25f));
+	objModel->tranform().setPosition(glm::vec3(0, 0, -5.0f));
+	objModel->tranform().setScale(glm::vec3(0.25f, 0.25f, 0.25f));
+
+  objModel2->addTexture(m_texture);
+  objModel2->tranform().setPosition(glm::vec3(0, -2, -5.0f));
+  objModel2->tranform().setScale(glm::vec3(0.25f, 0.25f, 0.25f));
+
+  //objModel->addChild(objModel2);
 
 
 	glm::vec3 rotAxis(0, 0, 1);
@@ -225,14 +239,14 @@ void MyVRApp::initModel()
 	skyDomeModel->addTexture(skyTexture);
         glm::vec3 skyInitPos = glm::vec3(0.0f, -10.0f, -5.0f);
         glm::vec3 skyInitScale = glm::vec3(70.0f, 70.0f, 70.0f);
-	skyDomeModel->setPosition(skyInitPos);
-	skyDomeModel->setScale(skyInitScale);
+	skyDomeModel->tranform().setPosition(skyInitPos);
+	skyDomeModel->tranform().setScale(skyInitScale);
 
 
 	terrain = new Terrain(80, 80,"../Resources/mceclip6.png");
 	
         glm::vec3 tererainInitPos = glm::vec3(-2.0f, -2.0f, -2.0f);
-	terrain->model().setPosition(tererainInitPos);
+	terrain->model().tranform().setPosition(tererainInitPos);
     
 	
 
@@ -243,8 +257,8 @@ void MyVRApp::renderScene(const MinVR::VRGraphicsState &renderState)
 
 	const float* vm = renderState.getViewMatrix();
 	
-
-
+  
+  glDisable(GL_CULL_FACE);
 	if (skyDomeModel)
      //if (false)
 	{
@@ -252,7 +266,7 @@ void MyVRApp::renderScene(const MinVR::VRGraphicsState &renderState)
 		glBlendFunc(GL_ONE, GL_ONE);
 		atmosphereShader.start();
 		glm::vec3 wl(powf(0.650f, 4.0), powf(0.570f, 4.0), powf(0.475f, 4.0));
-		glm::vec3 cameraHeightV = camera->myPosition - terrain->model().position();
+		glm::vec3 cameraHeightV = camera->myPosition - terrain->model().tranform().position();
 		float cameraHeight = glm::length(cameraHeightV);
 		//float fInnerRadius  = 10.0f;
 		//float fOuterRadius  = 60.25f;
@@ -313,6 +327,8 @@ void MyVRApp::renderScene(const MinVR::VRGraphicsState &renderState)
 		
 	}
 
+
+  glEnable(GL_CULL_FACE);
 	//if(x3dModel)
 	if (false)
 	{
@@ -341,7 +357,39 @@ void MyVRApp::renderScene(const MinVR::VRGraphicsState &renderState)
 		{
 			simpleTextureShader.setUniformMatrix4fv("v", vm);
 		}
-		objModel->render(simpleTextureShader);
+    
+    if (objModel->isSelected())
+    {
+      glEnable(GL_BLEND);
+      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+      simpleTextureShader.setUniformi("intersected", 1);
+      objModel->render(simpleTextureShader);
+      glEnable(GL_BLEND);
+    }
+    else
+    {
+      simpleTextureShader.setUniformi("intersected", 0);
+      objModel->render(simpleTextureShader);
+    }
+    
+
+    if (objModel2->isSelected())
+    {
+      glEnable(GL_BLEND);
+      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+      simpleTextureShader.setUniformi("intersected", 1);
+      objModel2->render(simpleTextureShader);
+      glEnable(GL_BLEND);
+    }
+    else
+    {
+      simpleTextureShader.setUniformi("intersected", 0);
+      objModel2->render(simpleTextureShader);
+    }
+
+    
+    
+
 		simpleTextureShader.stop();
 	}
 
@@ -367,9 +415,10 @@ void MyVRApp::renderScene(const MinVR::VRGraphicsState &renderState)
 		terrainShader.stop();
 	}
 
-	if (showRayByRotation || showRayByTranslation)
+	//if (showRayByRotation || showRayByTranslation)
+  if(true)
 	{
-		//rayInterection(renderState);
+		
 
 
 		LinesShader.start();
@@ -388,14 +437,27 @@ void MyVRApp::renderScene(const MinVR::VRGraphicsState &renderState)
 		const float* camPos = renderState.getCameraPos();
 		glm::vec3 cPos(camPos[0], camPos[1], camPos[2]);
 
+    /*std::cout << cPos.x << ", " << cPos.y << ", " <<
+      cPos.z << std::endl;*/
 
-		glm::mat4 ModelMatrix;
-		ModelMatrix *= glm::translate(cPos);
-		ModelMatrix *= glm::toMat4(glm::quat());
-		ModelMatrix *= glm::scale(vec3(10));
-		LinesShader.setUniform("m", ModelMatrix);
+    glm::vec3 controllerPosition;
+    glm::quat controllerOrientation;
+    glm::vec3 controllerScale;
+    
 
-		renderRay(cPos);
+    glm::decompose(controllerTransform, controllerScale,
+      controllerOrientation, controllerPosition, glm::vec3(), glm::vec4());
+   
+
+		glm::mat4 ModelMatrix = glm::mat4(1);
+    ModelMatrix *= glm::translate(ModelMatrix, controllerPosition);
+		glm::mat4 rot =  glm::toMat4(glm::quat());
+		glm::mat4 scal = glm::scale(vec3(1));
+
+		LinesShader.setUniform("m", ModelMatrix*rot*scal);
+
+    
+		renderRay(glm::vec3(0,0,0), controllerOrientation);
 		LinesShader.stop();
 		
 	}
@@ -411,7 +473,7 @@ void MyVRApp::rotateOnYaxis(Model& object, float direction)
 {
 
 
-	glm::quat currentQ = object.orientation();
+	glm::quat currentQ = object.tranform().orientation();
 
 	glm::vec3 rotAxis(0, 1, 0);
 	glm::quat q(
@@ -420,7 +482,7 @@ void MyVRApp::rotateOnYaxis(Model& object, float direction)
 		rotAxis.y * sinf(radians(direction) / 2.0f),
 		rotAxis.z * sinf(radians(direction) / 2.0f));
 
-	object.setOrientation(q * currentQ);
+	object.tranform().setOrientation(q * currentQ);
 }
 
 void MyVRApp::onAnalogChange(const MinVR::VRAnalogEvent &event)
@@ -446,12 +508,21 @@ void MyVRApp::onAnalogChange(const MinVR::VRAnalogEvent &event)
 					rotateOnYaxis(*objModel, direction);
 				}
 
-				/*else if (event.getName().find("Trigger") != -1)
+				if (event.getName().find("Trigger") != -1)
 				{
-					int pos1 = event.getName().find("Trigger");
+					/*int pos1 = event.getName().find("Trigger");
 					std::string axisName = event.getName().substr(pos1 + 6);
-					std::cout << axisName << "\n";
-				}*/
+					std::cout << axisName << "\n";*/
+          if (event.getValue() < 0.3)
+          {
+            grab = false;
+          }
+          else
+          {
+            grab = true;
+          }
+          
+				}
 				/*std::list<std::string> names = event.index().findAllNames();
 				for (string name:names)
 				{
@@ -470,24 +541,25 @@ void MyVRApp::onAnalogChange(const MinVR::VRAnalogEvent &event)
 			if (event.getName().find("HTC_Controller_1_Trigger1") != -1
 				|| event.getName().find("HTC_Controller_Right_Trigger1") != -1)
 			{
-				if (event.getValue() < 0.3)
+				/*if (event.getValue() < 0.3)
 				{
 					showRayByRotation = false;
 
 					return;
 				}
-
+        */
 				glm::quat q = controllerOrientation;
-				ray.x = 2 * q.x*q.z - 2 * q.y*q.w;
-				ray.y = 2 * q.y*q.z + 2 * q.x*q.w;
-				ray.z = 1 - 2 * q.x * q.x - 2 * q.y * q.y;
-				ray = glm::normalize(ray);
+				vrRay.x = 2 * q.x*q.z - 2 * q.y*q.w;
+				vrRay.y = 2 * q.y*q.z + 2 * q.x*q.w;
+				vrRay.z = 1 - 2 * q.x * q.x - 2 * q.y * q.y;
+				vrRay = glm::normalize(vrRay);
 
-
+        /*
 				showRayByRotation = true;
 
-				return;
+				return;*/
 
+        
 
 			}
 
@@ -502,10 +574,10 @@ void MyVRApp::onAnalogChange(const MinVR::VRAnalogEvent &event)
 				}
 
 				glm::quat q = controllerOrientation;
-				ray.x = 2 * q.x*q.z - 2 * q.y*q.w;
-				ray.y = 2 * q.y*q.z + 2 * q.x*q.w;
-				ray.z = 1 - 2 * q.x * q.x - 2 * q.y * q.y;
-				ray = glm::normalize(ray);
+				vrRay.x = 2 * q.x*q.z - 2 * q.y*q.w;
+				vrRay.y = 2 * q.y*q.z + 2 * q.x*q.w;
+				vrRay.z = 1 - 2 * q.x * q.x - 2 * q.y * q.y;
+				vrRay = glm::normalize(vrRay);
 
 				//translateObject = true;
 				showRayByTranslation = true;
@@ -579,7 +651,7 @@ void MyVRApp::onButtonDown(const MinVR::VRButtonEvent &event)
   {
     
     glm::vec3 ray = RayCast(cursorCurrentPos.x, cursorCurrentPos.y);
-    std::cout << ray.x << "," << ray.y << "," << ray.z << std::endl;
+    //std::cout << ray.x << "," << ray.y << "," << ray.z << std::endl;
     mouseSelectedEntity = TestRayEntityIntersection(ray);
     if (mouseSelectedEntity)
     {
@@ -801,7 +873,7 @@ void MyVRApp::onCursorMove(const MinVR::VRCursorEvent &event)
         float deltaY = (cursorCurrentPos.y - lastMousePosition.y);
         float absolutX = abs(deltaX);
         float absolutY = abs(deltaY);
-        vec3 newPosition = mouseSelectedEntity->position();
+        vec3 newPosition = mouseSelectedEntity->tranform().position();
         if (deltaX && deltaX < 0 && absolutX > 2.5)
         {
           newPosition -= rightVector;
@@ -819,7 +891,7 @@ void MyVRApp::onCursorMove(const MinVR::VRCursorEvent &event)
         {
           newPosition -= upvector;
         }
-        mouseSelectedEntity->setPosition(newPosition);
+        mouseSelectedEntity->tranform().setPosition(newPosition);
         lastMousePosition.x = cursorCurrentPos.x;
         lastMousePosition.y = cursorCurrentPos.y;
       }
@@ -843,20 +915,61 @@ void MyVRApp::onTrackerMove(const MinVR::VRTrackerEvent &event)
 		 //event.getName() == "HTC_Controller_Left_Move" ||
 		 event.getName() == "HTC_Controller_Right_Move")
 	{
-		
-		const float * transformM = event.getTransform();
-		glm::quat q;
-		q.w = sqrt(fmax(0, 1 + transformM[0] + transformM[5] + transformM[10])) / 2;
-		q.x = sqrt(fmax(0, 1 + transformM[0] - transformM[5] - transformM[10])) / 2;
-		q.y = sqrt(fmax(0, 1 - transformM[0] + transformM[5] - transformM[10])) / 2;
-		q.z = sqrt(fmax(0, 1 - transformM[0] - transformM[5] + transformM[10])) / 2;
-		q.x = copysign(q.x, transformM[9] - transformM[6]);
-		q.y = copysign(q.y, transformM[2] - transformM[8]);
-		q.z = copysign(q.z, transformM[4] - transformM[1]);
-	
-		
+    //std::cout << "here 1" << std::endl;
+		glm::mat4 newPose = glm::make_mat4(event.getTransform());
+    
+    //if (objModel && grab)
+    if (mouseSelectedEntity && grab)
+    {
 
-		if (objModel && rotateObject)
+      mouseSelectedEntity->tranform().applyMatrix(newPose * glm::inverse(controllerTransform));
+    }
+    
+    if (false)
+    {
+
+      glm::vec3 trControllerPosition;
+      glm::quat trControllerOrientation;
+      glm::vec3 trControllerScale;
+
+      glm::decompose(controllerTransform, trControllerScale,
+        trControllerOrientation, trControllerPosition, glm::vec3(), glm::vec4());
+
+      objModel2->tranform().setPosition(trControllerPosition);
+      //objModel2->tranform().applyMatrix(newPose );
+    }
+
+    controllerTransform = newPose;
+
+    rayInterection();
+
+    //controllerTransform  = transpose(controllerTransform);
+
+    
+    //controllerTransform = glm::transpose(controllerTransform);
+    /*for (int i = 0; i < 4 ; i ++)
+    {
+      std::cout << "[";
+      for (int j = 0; j < 4; j++)
+      {
+        std::cout << transformM[i * 4 + j] << " ";
+      }
+      std::cout << "]" << std::endl;
+    }
+    std::cout <<  std::endl;*/
+
+		glm::quat q;
+		q.w = sqrt(fmax(0, 1 + controllerTransform[0][0] + controllerTransform[1][1] + controllerTransform[2][2])) / 2;
+		q.x = sqrt(fmax(0, 1 + controllerTransform[0][0] - controllerTransform[1][1] - controllerTransform[2][2])) / 2;
+		q.y = sqrt(fmax(0, 1 - controllerTransform[0][0] + controllerTransform[1][1] - controllerTransform[2][2])) / 2;
+		q.z = sqrt(fmax(0, 1 - controllerTransform[0][0] - controllerTransform[1][1] + controllerTransform[2][2])) / 2;
+		q.x = copysign(q.x, controllerTransform[2][1] - controllerTransform[1][2]);
+		q.y = copysign(q.y, controllerTransform[0][2] - controllerTransform[2][0]);
+		q.z = copysign(q.z, controllerTransform[1][0] - controllerTransform[0][1]);
+    controllerOrientation = q;
+    //std::cout << q.x << " " << q.y << " " << q.y << " " << q.w << std::endl;
+
+		/*if (objModel && rotateObject)
 		{
 
 			glm::quat qdelta = q * glm::inverse(controllerOrientation);
@@ -874,9 +987,10 @@ void MyVRApp::onTrackerMove(const MinVR::VRTrackerEvent &event)
 		{
 			controllerOrientation = q;
 			
-		}
+		}*/
 
-		const float* pos = event.getPos();
+    
+		/*const float* pos = event.getPos();
 
 		glm::vec3 npos(pos[0], pos[1], pos[2]);
 		if (objModel && translateObject)
@@ -893,24 +1007,28 @@ void MyVRApp::onTrackerMove(const MinVR::VRTrackerEvent &event)
 		{
 			lastControllerPosition = npos;
 		}
-
+    */
 
         //std::cout << npos.x << " " << npos.y << "" << npos.z <<"\n";
 		
 	}
 }
 
-void MyVRApp::renderRay(glm::vec3 from)
+void MyVRApp::renderRay(const glm::vec3& from,const glm::quat& direction)
 {
-	
-
+  
+  
 	std::vector<glm::vec3> rayVector;
 	//rayVector.clear();
+  glm::vec3 forward = direction * glm::vec3(0, 0, -1);
 	rayVector.push_back(from);
-	glm::vec3 to = from + (-20.0f * ray);
+	glm::vec3 to = from + (20.0f * forward);
 	rayVector.push_back(to);
 
-	
+  /*std::cout << "ray from: " << rayVector[0].x
+    <<","<< rayVector[0].y << " ,"<< rayVector[0].z
+    << " to : " << rayVector[1].x << " ," << rayVector[1].y 
+    << " ," << rayVector[1].z <<std::endl;*/
 	
 	glBindVertexArray(bVao);
 	glBindBuffer(GL_ARRAY_BUFFER, bVbo);
@@ -929,19 +1047,41 @@ void MyVRApp::renderRay(glm::vec3 from)
 	glBindVertexArray(0);
 }
 
-void MyVRApp::rayInterection(const MinVR::VRGraphicsState &renderState)
+void MyVRApp::rayInterection()
 {
-	//
+	//  
 
-	const float* camPos = renderState.getCameraPos();
-	glm::vec3 cPos(camPos[0], camPos[1], camPos[2]);
+  glm::vec3 controllerPosition;
+  glm::quat controllerOrientation;
+  glm::vec3 controllerScale;
 
-	glm::vec3 start = cPos;
-	glm::vec3 modelPosition = objModel->position();
+
+  glm::decompose(controllerTransform, controllerScale,
+    controllerOrientation, controllerPosition, glm::vec3(), glm::vec4());
+
+	glm::vec3 start = controllerPosition;
+  if (objModel->RayInstersection(start, vrRay))
+  {
+    
+    mouseSelectedEntity = objModel;
+    return;
+  }
+  if (objModel2->RayInstersection(start, vrRay))
+  {
+    
+    mouseSelectedEntity = objModel2;
+    return;
+    
+  }
+  
+  mouseSelectedEntity = 0;
+
+
+  /*glm::vec3 modelPosition = objModel->tranform().position();
 	float radius = objModel->boundingVolumenRadius();
 
-	float b = 2 * (ray.x * (start.x - modelPosition.x) +
-		ray.y * (start.y - modelPosition.y) + ray.z * (start.z - modelPosition.z));
+	float b = 2 * (vrRay.x * (start.x - modelPosition.x) +
+		vrRay.y * (start.y - modelPosition.y) + vrRay.z * (start.z - modelPosition.z));
 	float c = start.x * start.x - 2 * start.x * modelPosition.x + modelPosition.x * modelPosition.x
 		+ start.y * start.y - 2 * start.y * modelPosition.y + modelPosition.y * modelPosition.y
 		+ start.z * start.z - 2 * start.z * modelPosition.z + modelPosition.z * modelPosition.z - radius * radius;
@@ -963,7 +1103,7 @@ void MyVRApp::rayInterection(const MinVR::VRGraphicsState &renderState)
 	{
 		rotateObject = false;
 		translateObject = false;
-	}
+	}*/
 	
 	
 }
@@ -1070,7 +1210,7 @@ void MyVRApp::loadFileModel(std::string& fileName)
   Model* newObjModel = GLMLoader::loadModel(fileName);
   if (newObjModel)
   {
-    newObjModel->setPosition(glm::vec3(0,0,0));
+    newObjModel->tranform().setPosition(glm::vec3(0,0,0));
     loadedModels.push_back(newObjModel);
   }
   else
@@ -1161,6 +1301,10 @@ void MyVRApp::onRenderGraphicsScene(const MinVR::VRGraphicsState &renderState)
 		renderScene(renderState);
 		camera->Update();
 	//}
+    //glEnable(GL_NORMALIZE);		glEnable(GL_DEPTH_TEST);		glEnable(GL_COLOR_MATERIAL);
+    //glEnable(GL_LIGHTING);		glEnable(GL_LIGHT0);
+    //glMatrixMode(GL_PROJECTION);		glLoadMatrixf(renderState.getProjectionMatrix());
+    //glMatrixMode(GL_MODELVIEW);		glLoadMatrixf(renderState.getViewMatrix());
     menus->drawMenu();
 	/*if (viewer.valid())
 	{

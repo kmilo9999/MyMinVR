@@ -1,0 +1,117 @@
+<MinVR>
+  
+  <GLFWPlugin pluginType="MinVR_GLFW"/>
+  <OpenGLPlugin pluginType="MinVR_OpenGL"/>
+  <OpenVRPlugin pluginType="MinVR_OpenVR"/>	
+
+  <Port type="string">3456</Port>
+  <ServerIP>192.168.10.148</ServerIP>
+
+  <ACaveServer hostType="VRServer">
+    <NumClients>1</NumClients>
+    <HostIP>localhost</HostIP>
+    <LogToFile>CaveServer.log</LogToFile>
+
+    <ConvertLHtoRH>0</ConvertLHtoRH>
+    <IgnoreZeroes>0</IgnoreZeroes>
+    <WaitForNewReportInPoll>0</WaitForNewReportInPoll>
+    <TrackerUnitsToRoomUnitsScale>3.28084</TrackerUnitsToRoomUnitsScale>
+    <DeviceToRoom type="floatarray">1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1</DeviceToRoom>
+
+  </ACaveServer>
+
+  <RGBBits>8</RGBBits>
+  <AlphaBits>8</AlphaBits>
+  <DepthBits>24</DepthBits>
+  <StencilBits>8</StencilBits>
+  <FullScreen>0</FullScreen>
+  <Resizable>1</Resizable>
+  <AllowMaximize>1</AllowMaximize>
+  <Visible>1</Visible>
+  <SharedContextGroupID>-1</SharedContextGroupID>
+  <ContextVersionMajor>3</ContextVersionMajor>
+  <ContextVersionMinor>3</ContextVersionMinor>
+  <UseGPUAffinity>1</UseGPUAffinity>
+  <UseDebugContext>0</UseDebugContext>
+  <MSAASamples>0</MSAASamples>
+  <QuadBuffered>0</QuadBuffered>
+
+  <Border>0</Border>
+  <Caption>Desktop</Caption>
+  <GPUAffinity>None</GPUAffinity>
+  <StereoFormat>QuadBuffered</StereoFormat>
+  <EyeSeparation>0.2</EyeSeparation>
+  <Visible>1</Visible>
+
+  <!-- Setup a Desktop-Style Camera -->
+  <NearClip>0.001</NearClip>
+  <FarClip>500.0</FarClip>
+  <!-- same x,y field of view b/c requesting a square window below -->
+  <FieldOfViewX>60.0</FieldOfViewX>
+  <FieldOfViewY>60.0</FieldOfViewY>
+
+
+  <LookAtUp type="floatarray">0,1,0</LookAtUp>
+  <LookAtCenter type="floatarray">0,0,1</LookAtCenter>
+  <LookAtEye type="floatarray">0,4,0</LookAtEye>
+  <Width>1024</Width>
+  <Height>1024</Height>
+  <XPos>0</XPos>
+  <YPos>0</YPos>
+  <HeadTrackingEvent>HeadTracker_Move</HeadTrackingEvent>
+  <GLFWToolkit windowtoolkitType="VRGLFWWindowToolkit"/>
+  <OpenGLToolkit graphicstoolkitType="VROpenGLGraphicsToolkit"/>
+  
+   <FakeHead inputdeviceType="VRFakeHeadTrackerDevice">
+      <TrackerName>HeadTracker</TrackerName>
+      <ToggleOnOffEvent>Kbd1_Down</ToggleOnOffEvent>
+    </FakeHead>
+
+    <FakeHand1 inputdeviceType="VRFakeHandTrackerDevice">
+      <TrackerName>RHandTracker</TrackerName>
+      <ToggleOnOffEvent>Kbd2_Down</ToggleOnOffEvent>
+      <XYTranslationScale>2.0</XYTranslationScale>
+      <ZTranslationScale>2.0</ZTranslationScale>
+    </FakeHand1>
+
+    <FakeHand2 inputdeviceType="VRFakeHandTrackerDevice">
+      <TrackerName>LHandTracker</TrackerName>
+      <ToggleOnOffEvent>Kbd3_Down</ToggleOnOffEvent>
+      <XYTranslationScale>2.0</XYTranslationScale>
+      <ZTranslationScale>2.0</ZTranslationScale>
+    </FakeHand2>
+
+ 
+		
+	    <RootNode displaynodeType="VRGraphicsWindowNode">
+			<HTC displaynodeType="VROpenVRNode">
+				<HideTracker>0</HideTracker>
+				<ReportStatePressed>1</ReportStatePressed>
+				<ReportStateTouched>1</ReportStateTouched>
+				<ReportStateAxis>1</ReportStateAxis>
+				<ReportStatePose>1</ReportStatePose>
+				<DrawHMDOnly>0</DrawHMDOnly>
+				<MSAA_buffers>4</MSAA_buffers>	
+			</HTC>
+		</RootNode>
+		
+
+
+  
+
+ 
+  <Cave00 hostType="VRClient">
+    <HostIP>localhost</HostIP>
+    <HostDisplay>:0.0</HostDisplay>
+    <copiedNode linkNode="/MinVR/RootNode"/>
+  </Cave00>
+
+  <Cave01 hostType="VRClient">
+    <HostIP>192.168.10.125</HostIP>
+    <HostDisplay>:0.0</HostDisplay>
+    <copiedNode linkNode="/MinVR/RootNode"/>
+  </Cave01>
+
+
+
+</MinVR>

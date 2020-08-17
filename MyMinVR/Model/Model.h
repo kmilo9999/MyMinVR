@@ -3,6 +3,7 @@
 #include "../GLMLoader/VertexBuffer.h"
 #include "../Texture/Texture.h"
 #include "../ShaderProgram/ShaderProgram.h"
+#include "Transform.h"
 
 class Model
 {
@@ -20,17 +21,6 @@ public:
 
 	void render(ShaderProgram shader);
 
-
-	glm::vec3& position();
-	void setPosition(glm::vec3 val);
-
-	glm::quat& orientation(); 
-	void setOrientation(glm::quat val); 
-
-	glm::vec3& scale(); 
-	void setScale(glm::vec3 val); 
-
-
 	float boundingVolumenRadius() const; 
 	void setBoundingVolumenRadius(float val); 
 
@@ -38,6 +28,20 @@ public:
 
   bool isSelected();
   void seleted(bool );
+
+  Transform& tranform()  { return myTransform; }
+
+  void setTranform(Transform val) { myTransform = val; }
+
+  void addChild(Model* parent);
+
+  void removeChild(int pos);
+
+  void setParentTransform(Transform* parentTransforM);
+
+  void removeParent();
+
+ 
 
 private:
 
@@ -50,13 +54,15 @@ private:
 	friend class AssimpLoader;
 	friend class Terrain;
 
-	glm::vec3 myPosition;
-	glm::quat myOrientation;
-	glm::vec3 myScale;
+  Transform myTransform;
 
 	float myBoundingVolumenRadius;
 
   bool mySelected;
+
+  std::vector<Model*> myChildren;
+
+  
 };
 
 #endif

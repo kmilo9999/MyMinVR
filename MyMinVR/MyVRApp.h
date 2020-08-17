@@ -77,8 +77,8 @@ protected:
 protected:
 
   
-	void renderRay(glm::vec3 from);
-	void rayInterection(const MinVR::VRGraphicsState &renderState);
+	void renderRay(const glm::vec3& from, const glm::quat& direction);
+	void rayInterection();
 
 	void renderSphere(const MinVR::VRGraphicsState &renderState);
 	void renderListOfMeshes(const MinVR::VRGraphicsState &renderState);
@@ -104,6 +104,8 @@ protected:
 	std::string myFilePath;
 
 	Model* objModel;
+  Model* objModel2;
+
 	Model* x3dModel;
 	Model* skyDomeModel;
 	Model* sphereModel;
@@ -121,6 +123,8 @@ protected:
 
 	glm::vec3 lastControllerPosition;
 	glm::quat controllerOrientation;
+  glm::mat4 controllerTransform;
+  bool grab;
 
 	// shader input
 	float fInnerRadius = 10.0f;
@@ -130,13 +134,16 @@ protected:
   glm::vec2 cursorCurrentPos;
   glm::vec2 lastMousePosition;
 
+
+
   Model* mouseSelectedEntity;
+  
 
 	GLuint bVao;
 	GLuint bVbo;
 	bool showRayByRotation;
 	bool showRayByTranslation;
-	glm::vec3 ray;
+	glm::vec3 vrRay;
 	bool rotateObject;
 	bool translateObject;
 

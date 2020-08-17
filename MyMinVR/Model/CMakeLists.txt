@@ -2,7 +2,8 @@ add_library(
 Model
 Model.cpp
 Model.h
-
+Transform.cpp
+Transform.h
 )
 
 target_include_directories(Model PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")

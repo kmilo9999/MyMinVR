@@ -9,6 +9,7 @@ in vec2 TexCoord;
 
 out vec4 fragColor;
 uniform sampler2D myTextureSampler;
+uniform int intersected;
 
 void main() {
     float ambient = 0.1;
@@ -17,5 +18,10 @@ void main() {
     fragColor = (ambient + diffuse) * color;
 	//fragColor = color;
 
-	fragColor = vec4(texture( myTextureSampler, TexCoord ).rgb,1);
+	float alphaV = 1.0f;
+	if(intersected != 0)
+	{
+	  alphaV = 0.5;
+	}
+	fragColor = vec4(vec3(1,0,0),alphaV);
 }

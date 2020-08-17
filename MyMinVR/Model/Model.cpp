@@ -4,7 +4,7 @@
 #include <cassert>
 
 
-Model::Model():myPosition(0),myOrientation(quat()),myScale(1), myBoundingVolumenRadius(1)
+Model::Model():myTransform(), myBoundingVolumenRadius(1.0f)
 {
 
 }
@@ -43,12 +43,8 @@ void Model::addTexture(Texture* val)
 void Model::render(ShaderProgram shaderProgram)
 {
 
-	glm::mat4 m_model = glm::mat4(1.0f);
-	m_model *= glm::translate(myPosition);
-	m_model *= glm::toMat4(myOrientation);
-	m_model *= glm::scale(myScale);
 
-	shaderProgram.setUniform("m", m_model);
+	shaderProgram.setUniform("m", myTransform.getTransformationMatrix());
 
 	assert(myObjModel && "NO MODEL TO RENDER");
 	// bind texture
@@ -64,35 +60,6 @@ void Model::render(ShaderProgram shaderProgram)
 	}
 }
 
-glm::vec3& Model::position() 
-{
-	return myPosition;
-}
-
-void Model::setPosition(glm::vec3 val)
-{
-	myPosition = val;
-}
-
-glm::quat& Model::orientation() 
-{
-	return myOrientation;
-}
-
-void Model::setOrientation(glm::quat val)
-{
-	myOrientation = val;
-}
-
-glm::vec3& Model::scale() 
-{
-	return myScale;
-}
-
-void Model::setScale(glm::vec3 val)
-{
-	myScale = val;
-}
 
 float Model::boundingVolumenRadius() const
 {
@@ -107,7 +74,7 @@ void Model::setBoundingVolumenRadius(float val)
 bool Model::RayInstersection(vec3 start, vec3 rayDirection)
 {
   
-  glm::vec3 Position = myPosition;
+  glm::vec3 Position = myTransform.position();
 
   float b = 2 * (rayDirection.x * (start.x - Position.x) +
     rayDirection.y * (start.y - Position.y) + rayDirection.z * (start.z - Position.z));
@@ -130,6 +97,7 @@ bool Model::RayInstersection(vec3 start, vec3 rayDirection)
   return mySelected;
 }
 
+
 bool Model::isSelected()
 {
   return mySelected;
@@ -139,3 +107,29 @@ void Model::seleted(bool selected)
 {
   mySelected = selected;
 }
+
+void Model::addChild(Model* child)
+{
+  child->tranform().setParentTransform(&(this->myTransform));
+  myChildren.push_back(child);
+  
+}
+
+void Model::removeChild(int pos)
+{
+  if (pos > myChildren.size())
+  {
+    return;
+  }
+  
+  myChildren[pos]->tranform().setParentTransform(0);
+  myChildren.erase(myChildren.begin() + pos);
+}
+
+void Model::setParentTransform(Transform* parentTransforM)
+{
+  this->tranform().setParentTransform(parentTransforM);
+}
+
+
+

@@ -10,6 +10,7 @@ public:
 	~Texture();
 
 	void Bind(GLenum TextureUnit);
+  
 	GLuint GetTextureId();
 
 	int LoadTexture(const std::string& fileName, int& width, int& height, unsigned char ** data, int& bbp);

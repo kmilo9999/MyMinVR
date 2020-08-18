@@ -16,7 +16,7 @@ Texture::~Texture()
 void Texture::Bind(GLenum TextureUnit)
 {
 	glActiveTexture(GL_TEXTURE0 + TextureUnit);
-	glBindTexture(myTextureTarget, texture_id);
+	glBindTexture(GL_TEXTURE_2D, texture_id);
 }
 
 GLuint Texture::GetTextureId()

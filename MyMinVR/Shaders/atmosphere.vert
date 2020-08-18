@@ -11,7 +11,7 @@ out vec3 v3Pos;
 out vec2 TexCoord;
 
 void main() {
-    v3Pos =  vec3(m * vec4(position, 1.0));
+    ///v3Pos =  vec3(m * vec4(position, 1.0));
 	TexCoord = uv;
     gl_Position = p * v * m * vec4(position, 1.0);
 }

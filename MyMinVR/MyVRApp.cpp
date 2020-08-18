@@ -50,7 +50,9 @@ menus(0),
 //objModel(0),
 m_is2d(true),
 mouseSelectedEntity(0),
+lockedEntity(0),
 grab(false),
+my_quaternion(glm::quat()),
 VRApp(argc, argv)
 { 
   
@@ -94,7 +96,21 @@ VRApp(argc, argv)
       menus = new VRMenuHandler(m_is2d);
       menus->addNewMenu(std::bind(&MyVRApp::menu_callback, this), 1024, 1024, 1, 1);
       VRMenu* menu = menus->addNewMenu(std::bind(&MyVRApp::menu_callback2, this), 1024, 1024, 1, 1);
-      menu->setMenuPose(glm::mat4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 2, 2, 0, 1));
+      //menu->setMenuPose(glm::mat4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 2, 2, 0, 1));
+      
+      if (m_is2d)
+      {
+        menu->setMenuPose(glm::mat4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 2, 2, 0, 1));
+      }
+      else
+      {
+        glm::mat4 translateM(1);
+        translateM = glm::translate(translateM, glm::vec3(1,1,-2));
+        menu->setMenuPose(translateM);
+      }
+
+      my_color = new float[4];
+      my_euler_angles = new float[3];
 		}
 
 
@@ -110,6 +126,9 @@ MyVRApp::~MyVRApp()
 	delete skyDomeModel;
 	delete terrain;
 	delete x3dModel;
+  delete my_color;
+  delete my_euler_angles;
+
   for (int i = 0 ;  i < loadedModels.size(); i++)
   {
     delete loadedModels[i];
@@ -163,7 +182,7 @@ void MyVRApp::initShaders()
 	atmosphereShader.addUniform("m");
 	atmosphereShader.addUniform("v");
 	atmosphereShader.addUniform("p");
-	atmosphereShader.addUniform("v3CameraPos");
+	/*atmosphereShader.addUniform("v3CameraPos");
 	atmosphereShader.addUniform("v3LightPos");
 	atmosphereShader.addUniform("v3InvWavelength");
 	atmosphereShader.addUniform("fCameraHeight");
@@ -180,7 +199,7 @@ void MyVRApp::initShaders()
 	atmosphereShader.addUniform("fScaleDepth");
 	atmosphereShader.addUniform("fScaleOverScaleDepth");
 	atmosphereShader.addUniform("fSamples");
-	atmosphereShader.addUniform("nSamples");
+	atmosphereShader.addUniform("nSamples");*/
 
 
 	LinesShader.LoadShaders("Shaders/linesShader.vert", "Shaders/linesShader.frag");
@@ -266,13 +285,18 @@ void MyVRApp::renderScene(const MinVR::VRGraphicsState &renderState)
 
 	const float* vm = renderState.getViewMatrix();
 	
-  
+  GLenum errCode = 0;
+  errCode = glGetError();
+  if (errCode != GL_NO_ERROR)
+  {
+    std::cout << "Render OpenGL error 0" << gluErrorString(errCode) << std::endl;
+  }
   glDisable(GL_CULL_FACE);
 	if (skyDomeModel)
   //if (false)
 	{
-		glFrontFace(GL_CW);
-		glBlendFunc(GL_ONE, GL_ONE);
+	//	glFrontFace(GL_CW);
+	//	glBlendFunc(GL_ONE, GL_ONE);
 		atmosphereShader.start();
 		glm::vec3 wl(powf(0.650f, 4.0), powf(0.570f, 4.0), powf(0.475f, 4.0));
 		glm::vec3 cameraHeightV = camera->myPosition - terrain->model().tranform().position();
@@ -298,29 +322,95 @@ void MyVRApp::renderScene(const MinVR::VRGraphicsState &renderState)
 		
 
 
-		
-		atmosphereShader.setUniform("v3CameraPos", camera->myPosition);
-		atmosphereShader.setUniform("v3LightPos", glm::vec3(0.0, 100.0, -10.0));
-		atmosphereShader.setUniform("v3InvWavelength", v3InvWavelength);
-		atmosphereShader.setUniformf("fCameraHeight", cameraHeight);
-		atmosphereShader.setUniformf("fCameraHeight2",cameraHeight * cameraHeight);
-		atmosphereShader.setUniformf("fInnerRadius",fInnerRadius);
-		atmosphereShader.setUniformf("fInnerRadius2",fInnerRadius * fInnerRadius);
-		atmosphereShader.setUniformf("fOuterRadius",fOuterRadius);
-		atmosphereShader.setUniformf("fOuterRadius2",fOuterRadius * fOuterRadius);
-		atmosphereShader.setUniformf("fKrESun",0.0025f * 15.0f);
-		atmosphereShader.setUniformf("fKmESun",0.0015f * 15.0f);
-		atmosphereShader.setUniformf("fKr4PI", fKr4PI);
-		atmosphereShader.setUniformf("fKm4PI", fKm4PI);
-		atmosphereShader.setUniformf("fScale", fScale);
-		atmosphereShader.setUniformf("fScaleDepth",0.25f);
-		atmosphereShader.setUniformf("fScaleOverScaleDepth", fScaleOverScaleDepth);
-		atmosphereShader.setUniformf("fSamples", 2.0f);
-		atmosphereShader.setUniformi("nSamples", 2);
+  //  errCode = glGetError();
+  //  if (errCode != GL_NO_ERROR)
+  //  {
+  //    std::cout << "Render OpenGL error 0.1" << gluErrorString(errCode) << std::endl;
+  //  }
+
+		//atmosphereShader.setUniform("v3CameraPos", camera->myPosition);
+  //  errCode = glGetError();
+  //  if (errCode != GL_NO_ERROR)
+  //  {
+  //    std::cout << "Render OpenGL error 0.11" << gluErrorString(errCode) << std::endl;
+  //  }
+		//atmosphereShader.setUniform("v3LightPos", glm::vec3(0.0f, 100.0f, -10.0f));
+  //  errCode = glGetError();
+  //  if (errCode != GL_NO_ERROR)
+  //  {
+  //    std::cout << "Render OpenGL error 0.12" << gluErrorString(errCode) << std::endl;
+  //  }
+		//atmosphereShader.setUniform("v3InvWavelength", v3InvWavelength);
+  //  errCode = glGetError();
+  //  if (errCode != GL_NO_ERROR)
+  //  {
+  //    std::cout << "Render OpenGL error 0.13" << gluErrorString(errCode) << std::endl;
+  //  }
+		//atmosphereShader.setUniformf("fCameraHeight", cameraHeight);
+  //  errCode = glGetError();
+  //  if (errCode != GL_NO_ERROR)
+  //  {
+  //    std::cout << "Render OpenGL error 0.14" << gluErrorString(errCode) << std::endl;
+  //  }
+		//atmosphereShader.setUniformf("fCameraHeight2",cameraHeight * cameraHeight);
+  //  errCode = glGetError();
+  //  if (errCode != GL_NO_ERROR)
+  //  {
+  //    std::cout << "Render OpenGL error 0.15" << gluErrorString(errCode) << std::endl;
+  //  }
+		//atmosphereShader.setUniformf("fInnerRadius",fInnerRadius);
+  //  errCode = glGetError();
+  //  if (errCode != GL_NO_ERROR)
+  //  {
+  //    std::cout << "Render OpenGL error 0.16" << gluErrorString(errCode) << std::endl;
+  //  }
+		//atmosphereShader.setUniformf("fInnerRadius2",fInnerRadius * fInnerRadius);
+  //  errCode = glGetError();
+  //  if (errCode != GL_NO_ERROR)
+  //  {
+  //    std::cout << "Render OpenGL error 0.17" << gluErrorString(errCode) << std::endl;
+  //  }
+		//atmosphereShader.setUniformf("fOuterRadius",fOuterRadius);
+
+  //  errCode = glGetError();
+  //  if (errCode != GL_NO_ERROR)
+  //  {
+  //    std::cout << "Render OpenGL error 0.18" << gluErrorString(errCode) << std::endl;
+  //  }
+
+		////atmosphereShader.setUniformf("fOuterRadius2",fOuterRadius * fOuterRadius);
+		////atmosphereShader.setUniformf("fKrESun",0.0025f * 15.0f);
+		////atmosphereShader.setUniformf("fKmESun",0.0015f * 15.0f);
+		////atmosphereShader.setUniformf("fKr4PI", fKr4PI);
+		////atmosphereShader.setUniformf("fKm4PI", fKm4PI);
+		////atmosphereShader.setUniformf("fScale", fScale);
+		////atmosphereShader.setUniformf("fScaleDepth",0.25f);
+		////atmosphereShader.setUniformf("fScaleOverScaleDepth", fScaleOverScaleDepth);
+		////atmosphereShader.setUniformf("fSamples", 2.0f);
+		////atmosphereShader.setUniformi("nSamples", 2);
+  //  
+  //  errCode = glGetError();
+  //  if (errCode != GL_NO_ERROR)
+  //  {
+  //    std::cout << "Render OpenGL error 0.3" << gluErrorString(errCode) << std::endl;
+  //  }
+
+
+    errCode = glGetError();
+    if (errCode != GL_NO_ERROR)
+    {
+      std::cout << "Render OpenGL error 0.5" << gluErrorString(errCode) << std::endl;
+    }
 		skyDomeModel->render(atmosphereShader);
+
+    errCode = glGetError();
+    if (errCode != GL_NO_ERROR)
+    {
+      std::cout << "Render OpenGL error 0.6" << gluErrorString(errCode) << std::endl;
+    }
 		atmosphereShader.stop();
-		glBlendFunc(GL_ONE, GL_ZERO);
-		glFrontFace(GL_CCW);
+		//glBlendFunc(GL_ONE, GL_ZERO);
+		//glFrontFace(GL_CCW);
 
 	
 //		/*const float* vm = renderState.getViewMatrix();
@@ -336,6 +426,11 @@ void MyVRApp::renderScene(const MinVR::VRGraphicsState &renderState)
 		
 	}
 
+  errCode = glGetError();
+  if (errCode != GL_NO_ERROR)
+  {
+    std::cout << "Render OpenGL error 1" << gluErrorString(errCode) << std::endl;
+  }
 
   glEnable(GL_CULL_FACE);
 	//if(x3dModel)
@@ -350,7 +445,11 @@ void MyVRApp::renderScene(const MinVR::VRGraphicsState &renderState)
 	}
 
 	renderListOfMeshes(renderState);
-
+  errCode = glGetError();
+  if (errCode != GL_NO_ERROR)
+  {
+    std::cout << "Render OpenGL error 2" << gluErrorString(errCode) << std::endl;
+  }
 	//renderSphere(renderState);
 
 	//if (objModel)
@@ -426,6 +525,14 @@ void MyVRApp::renderScene(const MinVR::VRGraphicsState &renderState)
 		
 		terrain->render(terrainShader);
 		// Reset the shader.
+
+
+    errCode = glGetError();
+    if (errCode != GL_NO_ERROR)
+    {
+      std::cout << "Render OpenGL error 3" <<  gluErrorString(errCode) << std::endl;
+    }
+
 		terrainShader.stop();
 	}
 
@@ -522,7 +629,31 @@ void MyVRApp::onAnalogChange(const MinVR::VRAnalogEvent &event)
 				//	rotateOnYaxis(*objModel, direction);
 				//}
 
-				if (event.getName().find("Trigger") != -1)
+        if (event.getName().find("Trigger2") != -1)
+        {
+          if (event.getValue() < 0.3)
+          {
+            //grab = false;
+          }
+          else
+          {
+            if (mouseSelectedEntity)
+            {
+              my_color[0] = mouseSelectedEntity->color().r;
+              my_color[1] = mouseSelectedEntity->color().g;
+              my_color[2] = mouseSelectedEntity->color().b;
+
+              glm::vec3 rot = glm::eulerAngles(mouseSelectedEntity->tranform().orientation());
+              my_euler_angles[0] = rot.x;
+              my_euler_angles[1] = rot.y;
+              my_euler_angles[2] = rot.z;
+
+              lockedEntity = mouseSelectedEntity;
+            }
+          }
+        }
+
+				if (event.getName().find("Trigger1") != -1)
 				{
 					/*int pos1 = event.getName().find("Trigger");
 					std::string axisName = event.getName().substr(pos1 + 6);
@@ -1099,6 +1230,7 @@ void MyVRApp::rayInterection()
     
   }*/
   
+  
   mouseSelectedEntity = 0;
 
 
@@ -1210,6 +1342,15 @@ void MyVRApp::menu_callback()
 
   if (ImGui::Begin("dummy window"))
   {
+    
+    ImGui::ColorEdit4("Color", my_color);
+    
+    glm::vec3 rotEuler = glm::eulerAngles(my_quaternion);
+    my_euler_angles[0] = rotEuler.x;
+    my_euler_angles[1] = rotEuler.y;
+    my_euler_angles[2] = rotEuler.z;
+
+    ImGui::SliderFloat3("Rotation", my_euler_angles,0,180);
     // open file dialog when user clicks this button
     if (ImGui::Button("open file dialog")) {
       // (optional) set browser properties
@@ -1327,6 +1468,18 @@ void MyVRApp::onRenderGraphicsContext(const MinVR::VRGraphicsState &renderState)
 		
 
 	}
+
+  if (lockedEntity)
+  {
+    lockedEntity->setColor(glm::vec3(my_color[0], my_color[1], my_color[2]));
+    my_quaternion = glm::quat(glm::vec3(my_euler_angles[0],
+      my_euler_angles[1], my_euler_angles[2]));
+
+    lockedEntity->tranform().setOrientation(my_quaternion);
+  }
+
+  
+
   if (menus)
   {
     menus->renderToTexture();
@@ -1341,36 +1494,45 @@ void MyVRApp::onRenderGraphicsScene(const MinVR::VRGraphicsState &renderState)
 		// Clear the screen.
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
+    if (!m_is2d)
+    {
+      glDisable(GL_CULL_FACE);
+
+
+      glEnable(GL_NORMALIZE);
+      glEnable(GL_DEPTH_TEST);
+      glEnable(GL_COLOR_MATERIAL);
+
+      glEnable(GL_LIGHTING);
+      glEnable(GL_LIGHT0);
+
+      glMatrixMode(GL_PROJECTION);
+      glLoadMatrixf(renderState.getProjectionMatrix());
+      
+      glMatrixMode(GL_MODELVIEW);
+      glLoadMatrixf(renderState.getViewMatrix());
+
+      menus->drawMenu();
+      glFlush();
+      glEnable(GL_CULL_FACE);
+    }
     
-    glDisable(GL_CULL_FACE);
-
-
-    glEnable(GL_NORMALIZE);
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_COLOR_MATERIAL);
-
-    glEnable(GL_LIGHTING);
-    glEnable(GL_LIGHT0);
-
-    glMatrixMode(GL_PROJECTION);
-    glLoadMatrixf(renderState.getProjectionMatrix());
-
-    glMatrixMode(GL_MODELVIEW);
-    glLoadMatrixf(renderState.getViewMatrix());
-    menus->drawMenu();
-    glFlush();
-    glEnable(GL_CULL_FACE);
 
 
 		renderScene(renderState);
-	//	camera->Update();
+	  camera->Update();
+
+    if (m_is2d)
+    {
+      menus->drawMenu();
+    }
+    
 	//}
     //glEnable(GL_NORMALIZE);		glEnable(GL_DEPTH_TEST);		glEnable(GL_COLOR_MATERIAL);
     //glEnable(GL_LIGHTING);		glEnable(GL_LIGHT0);
     //glMatrixMode(GL_PROJECTION);		glLoadMatrixf(renderState.getProjectionMatrix());
     //glMatrixMode(GL_MODELVIEW);		glLoadMatrixf(renderState.getViewMatrix());
 
-    
 
 	/*if (viewer.valid())
 	{

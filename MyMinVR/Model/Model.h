@@ -19,7 +19,7 @@ public:
 	void addTexture(Texture* val); 
 	
 
-	void render(ShaderProgram shader);
+	void render( ShaderProgram& shader);
 
 	float boundingVolumenRadius() const; 
 	void setBoundingVolumenRadius(float val); 

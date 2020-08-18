@@ -90,7 +90,7 @@ void ShaderProgram::setUniformf(const char * name, float value)
 	glUniform1f(uniforms[name], value);
 }
 
-void ShaderProgram::setUniform(const char * name, vec3 vector)
+void ShaderProgram::setUniform(const char * name,const vec3& vector)
 {
 	glUniform3f(uniforms[name], vector.x, vector.y, vector.z);
 }
@@ -105,7 +105,7 @@ void ShaderProgram::setUniform(const char * name,const vec4& vector)
   glUniform4f(uniforms[name], vector.x, vector.y, vector.z, vector.w);
 }
 
-void ShaderProgram::setUniform(const char * name, mat4 matrix)
+void ShaderProgram::setUniform(const char * name, const mat4& matrix)
 {
 	if (!InUse())
 	{
@@ -143,9 +143,9 @@ void ShaderProgram::VerifiProgram(GLuint programId)
 
 	if (Result == false) {
 		glGetShaderiv(programId, GL_INFO_LOG_LENGTH, &InfoLogLength);
-		std::vector<char> VertexShaderErrorMessage(InfoLogLength + 1);
-		glGetShaderInfoLog(programId, InfoLogLength, NULL, &VertexShaderErrorMessage[0]);
-		printf("%s\n", &VertexShaderErrorMessage[0]);
+		std::vector<char> shaderErrorMessage(InfoLogLength + 1);
+		glGetShaderInfoLog(programId, InfoLogLength, NULL, &shaderErrorMessage[0]);
+		printf("%s\n", &shaderErrorMessage[0]);
 	}
 
 	assert(Result);

@@ -137,6 +137,7 @@ protected:
 
 
   Model* mouseSelectedEntity;
+  Model* lockedEntity;
   
 
 	GLuint bVao;
@@ -149,6 +150,9 @@ protected:
 
   VRMenuHandler *menus;
   ImGui::FileBrowser fileDialog;
+  float* my_color;
+  float* my_euler_angles;
+  glm::quat my_quaternion;
 
 	glm::vec3 carpetPosition, carpetUp, carpetScale;
 	float carpetDirection; // (expressed in radians)

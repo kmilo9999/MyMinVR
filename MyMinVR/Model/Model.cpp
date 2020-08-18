@@ -40,7 +40,7 @@ void Model::addTexture(Texture* val)
 	myTextures.push_back(val);
 }
 
-void Model::render(ShaderProgram shaderProgram)
+void Model::render( ShaderProgram& shaderProgram)
 {
 
 
@@ -58,6 +58,12 @@ void Model::render(ShaderProgram shaderProgram)
 	{
 		myObjModel->render();
 	}
+  
+  glBindTexture(GL_TEXTURE_2D, 0);
+
+
+
+
 }
 
 

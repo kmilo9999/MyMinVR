@@ -110,6 +110,10 @@ MyVRApp::~MyVRApp()
 	delete skyDomeModel;
 	delete terrain;
 	delete x3dModel;
+  for (int i = 0 ;  i < loadedModels.size(); i++)
+  {
+    delete loadedModels[i];
+  }
 }
 
 

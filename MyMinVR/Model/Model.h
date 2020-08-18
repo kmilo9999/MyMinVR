@@ -43,6 +43,8 @@ public:
 
  
 
+  const glm::vec3& color()  { return myColor; }
+  void setColor(const glm::vec3& val) { myColor = val; }
 private:
 
 	Model();
@@ -62,6 +64,7 @@ private:
 
   std::vector<Model*> myChildren;
 
+  glm::vec3 myColor;
   
 };
 

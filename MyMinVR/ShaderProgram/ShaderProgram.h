@@ -22,6 +22,7 @@ public:
 	void setUniformf(const char* name, float value);
 	void setUniform(const char* name, vec3 vector);
 	void setUniform(const char* name, vec4 vector);
+  void setUniform(const char* name, const vec4& vector);
 	void setUniform(const char* name, mat4 matrix);
 	void setUniformMatrix4fv(const char* name, const GLfloat* matrix);
 

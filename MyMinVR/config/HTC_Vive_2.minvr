@@ -4,8 +4,7 @@
 	<OpenGLPlugin pluginType="MinVR_OpenGL"/>
     <OpenVRPlugin pluginType="MinVR_OpenVR"/>
    
-
-	  <RGBBits>8</RGBBits>
+      <RGBBits>8</RGBBits>
 	  <AlphaBits>8</AlphaBits>
 	  <DepthBits>24</DepthBits>
 	  <StencilBits>8</StencilBits>
@@ -14,8 +13,7 @@
 	  <AllowMaximize>1</AllowMaximize>
 	  <Visible>1</Visible>
 	  <SharedContextGroupID>-1</SharedContextGroupID>
-	  <ContextVersionMajor>3</ContextVersionMajor>
-	  <ContextVersionMinor>3</ContextVersionMinor>
+	  
 	  <UseGPUAffinity>1</UseGPUAffinity>
 	  <UseDebugContext>0</UseDebugContext>
 	  <MSAASamples>1</MSAASamples>

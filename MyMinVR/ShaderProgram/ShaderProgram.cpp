@@ -100,6 +100,11 @@ void ShaderProgram::setUniform(const char * name, vec4 vector)
 	glUniform4f(uniforms[name], vector.x, vector.y, vector.z, vector.w);
 }
 
+void ShaderProgram::setUniform(const char * name,const vec4& vector)
+{
+  glUniform4f(uniforms[name], vector.x, vector.y, vector.z, vector.w);
+}
+
 void ShaderProgram::setUniform(const char * name, mat4 matrix)
 {
 	if (!InUse())

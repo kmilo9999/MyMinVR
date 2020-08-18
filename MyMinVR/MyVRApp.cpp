@@ -47,7 +47,7 @@ showRayByTranslation(false),
 rotateObject(false), translateObject(false),
 camera(0),
 menus(0),
-objModel(0),
+//objModel(0),
 m_is2d(true),
 mouseSelectedEntity(0),
 grab(false),
@@ -106,7 +106,7 @@ MyVRApp::~MyVRApp()
 {
 	
 	delete camera;
-	delete objModel;
+	//delete objModel;
 	delete skyDomeModel;
 	delete terrain;
 	delete x3dModel;
@@ -137,6 +137,7 @@ void MyVRApp::initShaders()
 	simpleTextureShader.addUniform("v");
 	simpleTextureShader.addUniform("p");
   simpleTextureShader.addUniform("intersected");
+  simpleTextureShader.addUniform("color");
 
 	simpleColorShader.LoadShaders("Shaders/simpleColorShader.vert", "Shaders/simpleColorShader.frag");
 	simpleColorShader.addUniform("m");
@@ -198,22 +199,26 @@ void MyVRApp::initModel()
 	glGenBuffers(1, &bVbo);
 
 	std::string objFileName = "../Resources/cube.obj";
-  objModel = GLMLoader::loadModel(objFileName);
+  Model* objModel = GLMLoader::loadModel(objFileName);
 
   //std::string objFileName = "../Resources/cube.obj";
-  objModel2 = GLMLoader::loadModel(objFileName);
+  Model* objModel2 = GLMLoader::loadModel(objFileName);
 
 	//// Initialize texture
 	Texture* m_texture = new Texture(GL_TEXTURE_2D, "../Resources/Himalayas_DEM_Cube.jpg");
 	objModel->addTexture(m_texture);
 	objModel->tranform().setPosition(glm::vec3(0, 0, -5.0f));
 	objModel->tranform().setScale(glm::vec3(0.25f, 0.25f, 0.25f));
+  objModel->setColor(glm::vec4(0.9f, 0.0f, 0.0f, 1.0f));
 
   objModel2->addTexture(m_texture);
   objModel2->tranform().setPosition(glm::vec3(0, -2, -5.0f));
   objModel2->tranform().setScale(glm::vec3(0.25f, 0.25f, 0.25f));
-
+  objModel2->setColor(glm::vec4(0.9f, 0.9f, 0.0f, 1.0f));
   //objModel->addChild(objModel2);
+
+	loadedModels.push_back(objModel);
+  loadedModels.push_back(objModel2);
 
 
 	glm::vec3 rotAxis(0, 0, 1);
@@ -260,7 +265,7 @@ void MyVRApp::renderScene(const MinVR::VRGraphicsState &renderState)
   
   glDisable(GL_CULL_FACE);
 	if (skyDomeModel)
-     //if (false)
+  //if (false)
 	{
 		glFrontFace(GL_CW);
 		glBlendFunc(GL_ONE, GL_ONE);
@@ -344,54 +349,59 @@ void MyVRApp::renderScene(const MinVR::VRGraphicsState &renderState)
 
 	//renderSphere(renderState);
 
-	if (objModel)
+	//if (objModel)
 	//if (false)
-	{
-		simpleTextureShader.start();
-		simpleTextureShader.setUniformMatrix4fv("p", renderState.getProjectionMatrix());
-		if (myMode == desktop)
-		{
-			simpleTextureShader.setUniform("v", camera->GetView());
-		}
-		else
-		{
-			simpleTextureShader.setUniformMatrix4fv("v", vm);
-		}
-    
-    if (objModel->isSelected())
-    {
-      glEnable(GL_BLEND);
-      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-      simpleTextureShader.setUniformi("intersected", 1);
-      objModel->render(simpleTextureShader);
-      glEnable(GL_BLEND);
-    }
-    else
-    {
-      simpleTextureShader.setUniformi("intersected", 0);
-      objModel->render(simpleTextureShader);
-    }
-    
+	//{
+	//	simpleTextureShader.start();
+	//	simpleTextureShader.setUniformMatrix4fv("p", renderState.getProjectionMatrix());
+	//	if (myMode == desktop)
+	//	{
+	//		simpleTextureShader.setUniform("v", camera->GetView());
+	//	}
+	//	else
+	//	{
+	//		simpleTextureShader.setUniformMatrix4fv("v", vm);
+	//	}
+ //   
+ //   simpleTextureShader.setUniform("color", objModel->color());
 
-    if (objModel2->isSelected())
-    {
-      glEnable(GL_BLEND);
-      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-      simpleTextureShader.setUniformi("intersected", 1);
-      objModel2->render(simpleTextureShader);
-      glEnable(GL_BLEND);
-    }
-    else
-    {
-      simpleTextureShader.setUniformi("intersected", 0);
-      objModel2->render(simpleTextureShader);
-    }
+ //   if (objModel->isSelected())
+ //   {
+ //     glEnable(GL_BLEND);
+ //     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+ //     simpleTextureShader.setUniformi("intersected", 1);
+ //     objModel->render(simpleTextureShader);
+ //     glEnable(GL_BLEND);
+ //   }
+ //   else
+ //   {
+ //     simpleTextureShader.setUniformi("intersected", 0);
+ //     objModel->render(simpleTextureShader);
+ //   }
+ //   
+ //   simpleTextureShader.setUniform("color", objModel2->color());
+ //   
+ //   //simpleTextureShader.setUniform("color", color);
 
-    
-    
+ //   if (objModel2->isSelected())
+ //   {
+ //     glEnable(GL_BLEND);
+ //     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+ //     simpleTextureShader.setUniformi("intersected", 1);
+ //     objModel2->render(simpleTextureShader);
+ //     glEnable(GL_BLEND);
+ //   }
+ //   else
+ //   {
+ //     simpleTextureShader.setUniformi("intersected", 0);
+ //     objModel2->render(simpleTextureShader);
+ //   }
 
-		simpleTextureShader.stop();
-	}
+ //   
+ //   
+
+	//	simpleTextureShader.stop();
+	//}
 
 
 	if (terrain)
@@ -497,16 +507,16 @@ void MyVRApp::onAnalogChange(const MinVR::VRAnalogEvent &event)
 			if (event.getName().find("HTC_Controller_1_") != -1
 				|| event.getName().find("HTC_Controller_Right_") != -1)
 			{
-				if (event.getName().find("Joystick") != -1
-					&& objModel
-					)
-				{
-					//int pos1 = event.getName().find("Joystick");
-					//std::string axisName = event.getName().substr(pos1 + 8);
-					float direction = event.getValue();
-					//std::cout << axisName << " " << direction << "\n";
-					rotateOnYaxis(*objModel, direction);
-				}
+				//if (event.getName().find("Joystick") != -1
+				//	&& objModel
+				//	)
+				//{
+				//	//int pos1 = event.getName().find("Joystick");
+				//	//std::string axisName = event.getName().substr(pos1 + 8);
+				//	float direction = event.getValue();
+				//	//std::cout << axisName << " " << direction << "\n";
+				//	rotateOnYaxis(*objModel, direction);
+				//}
 
 				if (event.getName().find("Trigger") != -1)
 				{
@@ -588,15 +598,15 @@ void MyVRApp::onAnalogChange(const MinVR::VRAnalogEvent &event)
 		}
 		else if (myMode == cave)
 		{
-			if (event.getName() == "Wand_Joystick_Y_Update"
-				&& !(event.getValue() > -0.1 && event.getValue() < 0.1))
-			{
-				//int pos1 = event.getName().find("Joystick");
-				//std::string axisName = event.getName().substr(pos1 + 8);
-				float direction = event.getValue();
-				//std::cout << axisName << " " << direction << "\n";
-				rotateOnYaxis(*objModel, direction);
-			}
+			//if (event.getName() == "Wand_Joystick_Y_Update"
+			//	&& !(event.getValue() > -0.1 && event.getValue() < 0.1))
+			//{
+			//	//int pos1 = event.getName().find("Joystick");
+			//	//std::string axisName = event.getName().substr(pos1 + 8);
+			//	float direction = event.getValue();
+			//	//std::cout << axisName << " " << direction << "\n";
+			//	rotateOnYaxis(*objModel, direction);
+			//}
 				
 		}
 
@@ -919,6 +929,9 @@ void MyVRApp::onTrackerMove(const MinVR::VRTrackerEvent &event)
 		glm::mat4 newPose = glm::make_mat4(event.getTransform());
     
     //if (objModel && grab)
+    std::string res = grab ? "true" : "false";
+    std::cout << "grab " << res << std::endl;
+
     if (mouseSelectedEntity && grab)
     {
 
@@ -935,7 +948,7 @@ void MyVRApp::onTrackerMove(const MinVR::VRTrackerEvent &event)
       glm::decompose(controllerTransform, trControllerScale,
         trControllerOrientation, trControllerPosition, glm::vec3(), glm::vec4());
 
-      objModel2->tranform().setPosition(trControllerPosition);
+     // objModel2->tranform().setPosition(trControllerPosition);
       //objModel2->tranform().applyMatrix(newPose );
     }
 
@@ -1060,11 +1073,19 @@ void MyVRApp::rayInterection()
     controllerOrientation, controllerPosition, glm::vec3(), glm::vec4());
 
 	glm::vec3 start = controllerPosition;
-  if (objModel->RayInstersection(start, vrRay))
+  for (Model* model : loadedModels)
+  {
+    if (model->RayInstersection(start, vrRay))
+    {
+      mouseSelectedEntity = model;
+      return;
+    }
+  }
+  
+  /*if (objModel->RayInstersection(start, vrRay))
   {
     
-    mouseSelectedEntity = objModel;
-    return;
+    
   }
   if (objModel2->RayInstersection(start, vrRay))
   {
@@ -1072,7 +1093,7 @@ void MyVRApp::rayInterection()
     mouseSelectedEntity = objModel2;
     return;
     
-  }
+  }*/
   
   mouseSelectedEntity = 0;
 
@@ -1144,13 +1165,29 @@ void MyVRApp::renderListOfMeshes(const MinVR::VRGraphicsState & renderState)
 		}
 		else
 		{
-			simpleColorShader.setUniformMatrix4fv("v", renderState.getViewMatrix());
+      simpleTextureShader.setUniformMatrix4fv("v", renderState.getViewMatrix());
 		}
-		
+    
+    
+
 		//sphereModel->setPosition()
 		for (Model* model: loadedModels)
 		{
-			model->render(simpleTextureShader);
+      simpleTextureShader.setUniform("color", model->color());
+			//model->render(simpleTextureShader);
+      if (model->isSelected())
+      {
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        simpleTextureShader.setUniformi("intersected", 1);
+        model->render(simpleTextureShader);
+        glEnable(GL_BLEND);
+      }
+      else
+      {
+        simpleTextureShader.setUniformi("intersected", 0);
+        model->render(simpleTextureShader);
+      }
 		}
 		//sphereModel->render(simpleColorShader);
 		simpleTextureShader.stop();
@@ -1211,6 +1248,7 @@ void MyVRApp::loadFileModel(std::string& fileName)
   if (newObjModel)
   {
     newObjModel->tranform().setPosition(glm::vec3(0,0,0));
+    newObjModel->tranform().setScale(glm::vec3(0.25, 0.25, 0.25));
     loadedModels.push_back(newObjModel);
   }
   else
@@ -1224,13 +1262,13 @@ void MyVRApp::loadFileModel(std::string& fileName)
 Model* MyVRApp::TestRayEntityIntersection(vec3 ray)
 {
  
-  if (objModel)
+  /*if (objModel)
   {
     if (objModel->RayInstersection(camera->myPosition, ray))
     {
       return objModel;
     }
-  }
+  }*/
 
   for (int i = 0; i < loadedModels.size(); ++i)
   {
@@ -1298,14 +1336,38 @@ void MyVRApp::onRenderGraphicsScene(const MinVR::VRGraphicsState &renderState)
 	//if (isRunning()) {
 		// Clear the screen.
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    
+    
+    glDisable(GL_CULL_FACE);
+
+
+    glEnable(GL_NORMALIZE);
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_COLOR_MATERIAL);
+
+    glEnable(GL_LIGHTING);
+    glEnable(GL_LIGHT0);
+
+    glMatrixMode(GL_PROJECTION);
+    glLoadMatrixf(renderState.getProjectionMatrix());
+
+    glMatrixMode(GL_MODELVIEW);
+    glLoadMatrixf(renderState.getViewMatrix());
+    menus->drawMenu();
+    glFlush();
+    glEnable(GL_CULL_FACE);
+
+
 		renderScene(renderState);
-		camera->Update();
+	//	camera->Update();
 	//}
     //glEnable(GL_NORMALIZE);		glEnable(GL_DEPTH_TEST);		glEnable(GL_COLOR_MATERIAL);
     //glEnable(GL_LIGHTING);		glEnable(GL_LIGHT0);
     //glMatrixMode(GL_PROJECTION);		glLoadMatrixf(renderState.getProjectionMatrix());
     //glMatrixMode(GL_MODELVIEW);		glLoadMatrixf(renderState.getViewMatrix());
-    menus->drawMenu();
+
+    
+
 	/*if (viewer.valid())
 	{
 		viewer->frame();

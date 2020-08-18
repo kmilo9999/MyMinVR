@@ -103,8 +103,8 @@ protected:
 	Mode myMode;
 	std::string myFilePath;
 
-	Model* objModel;
-  Model* objModel2;
+	//Model* objModel;
+  //Model* objModel2;
 
 	Model* x3dModel;
 	Model* skyDomeModel;
